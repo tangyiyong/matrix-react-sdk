@@ -1166,7 +1166,6 @@ module.exports = React.createClass({
         const addMsisdnSection = (
             <AddPhoneNumber key="_addMsisdn" onThreepidAdded={this._refreshFromServer} />
         );
-        threepidsSection.push(addEmailSection);
         threepidsSection.push(addMsisdnSection);
 
         const accountJsx = (
