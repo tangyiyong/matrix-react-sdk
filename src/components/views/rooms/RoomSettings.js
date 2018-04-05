@@ -770,7 +770,6 @@ module.exports = React.createClass({
 
         const tags = [
             { name: "m.favourite", label: _t('Favourite'), ref: "tag_favourite" },
-            { name: "m.lowpriority", label: _t('Low priority'), ref: "tag_lowpriority" },
         ];
 
         Object.keys(this.state.tags).sort().forEach(function(tagName) {
