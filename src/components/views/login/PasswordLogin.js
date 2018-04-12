@@ -211,32 +211,11 @@ class PasswordLogin extends React.Component {
             error: this.props.loginIncorrect,
         });
 
-        const Dropdown = sdk.getComponent('elements.Dropdown');
-
         const loginField = this.renderLoginField(this.state.loginType, matrixIdText === '');
-
-        let loginType;
-        if (!SdkConfig.get().disable_3pid_login) {
-            loginType = (
-                <div className="mx_Login_type_container">
-                    <label className="mx_Login_type_label">{ _t('Sign in with') }</label>
-                    <Dropdown
-                        className="mx_Login_type_dropdown"
-                        value={this.state.loginType}
-                        disabled={matrixIdText === ''}
-                        onOptionChange={this.onLoginTypeChange}>
-                            <span key={PasswordLogin.LOGIN_FIELD_MXID}>{ matrixIdText }</span>
-                            <span key={PasswordLogin.LOGIN_FIELD_EMAIL}>{ _t('Email address') }</span>
-                            <span key={PasswordLogin.LOGIN_FIELD_PHONE}>{ _t('Phone') }</span>
-                    </Dropdown>
-                </div>
-            );
-        }
 
         return (
             <div>
                 <form onSubmit={this.onSubmitForm}>
-                { loginType }
                 { loginField }
                 <input className={pwFieldClass} ref={(e) => {this._passwordField = e;}} type="password"
                     name="password"
