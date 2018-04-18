@@ -1117,6 +1117,7 @@ module.exports = React.createClass({
         const ChangeAvatar = sdk.getComponent('settings.ChangeAvatar');
         const Notifications = sdk.getComponent("settings.Notifications");
         const EditableText = sdk.getComponent('elements.EditableText');
+        const ShowDisplayName = sdk.getComponent("views.settings.ShowDisplayName");
         const GeminiScrollbarWrapper = sdk.getComponent("elements.GeminiScrollbarWrapper");
 
         const avatarUrl = (
@@ -1127,7 +1128,6 @@ module.exports = React.createClass({
             const id = "3pid-" + val.address;
             // TODO: make a separate component to avoid having to rebind onClick
             // each time we render
-            const onRemoveClick = (e) => this.onRemoveThreepidClicked(val);
             return (
                 <div className="mx_UserSettings_profileTableRow" key={pidIndex}>
                     <div className="mx_UserSettings_profileLabelCell">
@@ -1138,42 +1138,14 @@ module.exports = React.createClass({
                             value={this.presentableTextForThreepid(val)} disabled
                         />
                     </div>
-                    <div className="mx_UserSettings_threepidButton mx_filterFlipColor">
-                        <img src="img/cancel-small.svg" width="14" height="14" alt={_t("Remove")}
-                            onClick={onRemoveClick} />
-                    </div>
                 </div>
             );
         });
-        let addEmailSection;
-        if (this.state.email_add_pending) {
-            addEmailSection = <Loader key="_email_add_spinner" />;
-        } else {
-            addEmailSection = (
-                <div className="mx_UserSettings_profileTableRow" key="_newEmail">
-                    <div className="mx_UserSettings_profileLabelCell">
-                        <label>{ _t('Email') }</label>
-                    </div>
-                    <div className="mx_UserSettings_profileInputCell">
-                        <EditableText
-                            ref="add_email_input"
-                            className="mx_UserSettings_editable"
-                            placeholderClassName="mx_UserSettings_threepidPlaceholder"
-                            placeholder={_t("Add email address")}
-                            blurToCancel={false}
-                            onValueChanged={this._onAddEmailEditFinished} />
-                    </div>
-                    <div className="mx_UserSettings_threepidButton mx_filterFlipColor">
-                         <img src="img/plus.svg" width="14" height="14" alt={_t("Add")} onClick={this._addEmail} />
-                    </div>
-                </div>
-            );
-        }
+
         const AddPhoneNumber = sdk.getComponent('views.settings.AddPhoneNumber');
         const addMsisdnSection = (
             <AddPhoneNumber key="_addMsisdn" onThreepidAdded={this._refreshFromServer} />
         );
-        threepidsSection.push(addEmailSection);
         threepidsSection.push(addMsisdnSection);
 
         const accountJsx = (
@@ -1226,7 +1198,7 @@ module.exports = React.createClass({
                                 <label htmlFor="displayName">{ _t('Display name') }</label>
                             </div>
                             <div className="mx_UserSettings_profileInputCell">
-                                <ChangeDisplayName />
+                                <ShowDisplayName />
                             </div>
                         </div>
                         { threepidsSection }
