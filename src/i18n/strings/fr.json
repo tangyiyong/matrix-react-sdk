@@ -294,6 +294,7 @@
     "These are experimental features that may break in unexpected ways": "Ce sont des fonctionnalités expérimentales qui peuvent créer des problèmes inattendus",
     "The visibility of existing history will be unchanged": "La visibilité de l’historique existant restera inchangée",
     "This doesn't appear to be a valid email address": "Cette adresse e-mail ne semble pas valide",
+    "You need to enter an email.": "Vous devez entrer un email.",
     "This is a preview of this room. Room interactions have been disabled": "Ceci est un aperçu du salon. Les interactions avec le salon ont été désactivées",
     "This phone number is already in use": "Ce numéro de téléphone est déjà utilisé",
     "This room is not accessible by remote Matrix servers": "Ce salon n’est pas accessible par les serveurs Matrix distants",

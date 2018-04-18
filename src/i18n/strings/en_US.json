@@ -452,6 +452,7 @@
     "Password too short (min %(MIN_PASSWORD_LENGTH)s).": "Password too short (min %(MIN_PASSWORD_LENGTH)s).",
     "This doesn't look like a valid email address.": "This doesn't look like a valid email address.",
     "This doesn't look like a valid phone number.": "This doesn't look like a valid phone number.",
+    "You need to enter an email.": "You need to enter an email.",
     "User names may only contain letters, numbers, dots, hyphens and underscores.": "User names may only contain letters, numbers, dots, hyphens and underscores.",
     "An unknown error occurred.": "An unknown error occurred.",
     "I already have an account": "I already have an account",

@@ -31,6 +31,8 @@ import SdkConfig from '../../../SdkConfig';
 import SettingsStore from "../../../settings/SettingsStore";
 
 const MIN_PASSWORD_LENGTH = 6;
+const TCHAP_API_URL = '/_matrix/identity/api/v1/info?medium=emil&address=';
+const TCHAP_HOSTS = ['https://matrix.a.tchap.gouv.fr', 'https://matrix.e.tchap.gouv.fr', 'https://matrix.i.tchap.gouv.fr'];
 
 module.exports = React.createClass({
     displayName: 'Registration',
@@ -145,7 +147,8 @@ module.exports = React.createClass({
         });
     },
 
-    onFormSubmit: function(formVals) {
+    onFormSubmit: async function(formVals) {
+        await this.discoverTchapPlatform(formVals.email);
         this.setState({
             errorText: "",
             busy: true,
@@ -272,6 +275,9 @@ module.exports = React.createClass({
             case "RegistrationForm.ERR_EMAIL_INVALID":
                 errMsg = _t('This doesn\'t look like a valid email address.');
                 break;
+            case "RegistrationForm.ERR_EMAIL_BLANK":
+                errMsg = _t('You need to enter an email.');
+                break;
             case "RegistrationForm.ERR_PHONE_NUMBER_INVALID":
                 errMsg = _t('This doesn\'t look like a valid phone number.');
                 break;
@@ -295,6 +301,17 @@ module.exports = React.createClass({
         if (!this._unmounted) {
             this.setState({ teamSelected });
         }
+    },
+
+    discoverTchapPlatform: async function(username) {
+        const selectedUrl = TCHAP_HOSTS[(Math.floor(Math.random() * (TCHAP_HOSTS.length)) + 1) - 1];
+        const res = await fetch(selectedUrl + TCHAP_API_URL + username);
+        const data = await res.json();
+        this.setState({
+            hsUrl: 'https://matrix.' + data.hs,
+            isUrl: 'https://matrix.' + data.hs,
+        });
+        this._replaceClient();
     },
 
     _makeRegisterRequest: function(auth) {
@@ -369,7 +386,6 @@ module.exports = React.createClass({
             registerBody = (
                 <div>
                     <RegistrationForm
-                        defaultUsername={this.state.formVals.username}
                         defaultEmail={this.state.formVals.email}
                         defaultPhoneCountry={this.state.formVals.phoneCountry}
                         defaultPhoneNumber={this.state.formVals.phoneNumber}
