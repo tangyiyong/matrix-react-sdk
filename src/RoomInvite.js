@@ -80,25 +80,12 @@ function selectRoom(addrTexts) {
 
     let roomCandidate = new Map();
     let selectedRoom = null;
-
-    console.log("========== ADDRTEXTS");
-    console.log(addrTexts);
-    console.log(addrTexts);
-
     const dmRooms = new DMRoomMap(MatrixClientPeg.get()).getDMRoomsForUserId(addrTexts[0]);
-    console.log("========== DMROOMS");
-    console.log(dmRooms);
-
-
 
     dmRooms.forEach(r => {
         let room = MatrixClientPeg.get().getRoom(r);
-        console.log("~~~~~~~~~~ ROOM");
-        console.log(room);
         if (room) {
             let me = room.getMember(MatrixClientPeg.get().credentials.userId);
-            console.log("~~~~~~~~~~ ME");
-            console.log(me);
 
             // Later, do something for selecting only last created
             roomCandidate.set(me.membership, me);
@@ -117,34 +104,28 @@ function selectRoom(addrTexts) {
 
 function _onStartChatFinished(shouldInvite, addrs) {
     if (!shouldInvite) return;
+
     const addrTexts = addrs.map((addr) => addr.address);
-
     selectRoom(addrTexts);
-
-    console.log(">>>>>>>>>> addrs");
-    console.log(addrs);
-    console.log(">>>>>>>>>> addrTexts");
-    console.log(addrTexts);
 
     if (_isDmChat(addrTexts)) {
         const rooms = [];
         let selectedRoom = selectRoom(addrTexts);
-        console.log(">>>>>>>>>> selectedRoom");
-        console.log(selectedRoom);
-
         const room = MatrixClientPeg.get().getRoom(selectedRoom);
+
         rooms.push(typeof room !== "undefined" ? room : _getDirectMessageRooms(addrTexts[0]));
 
-        console.log(">>>>>>>>>> rooms");
-        console.log(rooms);
-        console.log(">>>>>>>>>> findIndex");
-        console.log(rooms.some(e => {return (e !== null)}));
-
         if (rooms.length > 0 && rooms.some(e => {return (e !== null)})) {
-            MatrixClientPeg.get().joinRoom(selectedRoom).done(() => {
-                console.log("ROOM JOINED !!!");
+            const him = rooms[0].getMember(addrTexts[0]);
+                MatrixClientPeg.get().joinRoom(selectedRoom).done(() => {
+                if (him.membership === 'leave' || him.membership === 'reject') {
+                    inviteToRoom(rooms[0].roomId, him.userId);
+                }
+                dis.dispatch({
+                    action: 'view_room',
+                    room_id: rooms[0].roomId,
+                });
             }, (err) => {
-                console.log("OOPS SMTH WENT WRONG !!");
                 dis.dispatch({
                     action: 'join_room_error',
                     err: err,
@@ -155,10 +136,6 @@ function _onStartChatFinished(shouldInvite, addrs) {
                     title: _t("Failed to join room"),
                     description: msg,
                 });
-            });
-            dis.dispatch({
-                action: 'view_room',
-                room_id: rooms[0].roomId,
             });
         } else {
             // Start a new DM chat
