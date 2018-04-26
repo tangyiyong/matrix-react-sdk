@@ -75,34 +75,91 @@ export function showRoomInviteDialog(roomId) {
     });
 }
 
+
+function selectRoom(addrTexts) {
+
+    let roomCandidate = new Map();
+    let selectedRoom = null;
+
+    console.log("========== ADDRTEXTS");
+    console.log(addrTexts);
+    console.log(addrTexts);
+
+    const dmRooms = new DMRoomMap(MatrixClientPeg.get()).getDMRoomsForUserId(addrTexts[0]);
+    console.log("========== DMROOMS");
+    console.log(dmRooms);
+
+
+
+    dmRooms.forEach(r => {
+        let room = MatrixClientPeg.get().getRoom(r);
+        console.log("~~~~~~~~~~ ROOM");
+        console.log(room);
+        if (room) {
+            let me = room.getMember(MatrixClientPeg.get().credentials.userId);
+            console.log("~~~~~~~~~~ ME");
+            console.log(me);
+
+            // Later, do something for selecting only last created
+            roomCandidate.set(me.membership, me);
+        }
+    });
+
+    if (roomCandidate.has("join")) {
+        selectedRoom = roomCandidate.get("join").roomId;
+    } else if (roomCandidate.has("invite")) {
+        selectedRoom = roomCandidate.get("invite").roomId;
+    } else {
+        selectedRoom = null;
+    }
+    return selectedRoom;
+}
+
 function _onStartChatFinished(shouldInvite, addrs) {
     if (!shouldInvite) return;
-
     const addrTexts = addrs.map((addr) => addr.address);
 
+    selectRoom(addrTexts);
+
+    console.log(">>>>>>>>>> addrs");
+    console.log(addrs);
+    console.log(">>>>>>>>>> addrTexts");
+    console.log(addrTexts);
+
     if (_isDmChat(addrTexts)) {
-        const rooms = _getDirectMessageRooms(addrTexts[0]);
-        if (rooms.length > 0) {
-            // A Direct Message room already exists for this user, so select a
-            // room from a list that is similar to the one in MemberInfo panel
-            const ChatCreateOrReuseDialog = sdk.getComponent("views.dialogs.ChatCreateOrReuseDialog");
-            const close = Modal.createTrackedDialog('Create or Reuse', '', ChatCreateOrReuseDialog, {
-                userId: addrTexts[0],
-                onNewDMClick: () => {
-                    dis.dispatch({
-                        action: 'start_chat',
-                        user_id: addrTexts[0],
-                    });
-                    close(true);
-                },
-                onExistingRoomSelected: (roomId) => {
-                    dis.dispatch({
-                        action: 'view_room',
-                        room_id: roomId,
-                    });
-                    close(true);
-                },
-            }).close;
+        const rooms = [];
+        let selectedRoom = selectRoom(addrTexts);
+        console.log(">>>>>>>>>> selectedRoom");
+        console.log(selectedRoom);
+
+        const room = MatrixClientPeg.get().getRoom(selectedRoom);
+        rooms.push(typeof room !== "undefined" ? room : _getDirectMessageRooms(addrTexts[0]));
+
+        console.log(">>>>>>>>>> rooms");
+        console.log(rooms);
+        console.log(">>>>>>>>>> findIndex");
+        console.log(rooms.some(e => {return (e !== null)}));
+
+        if (rooms.length > 0 && rooms.some(e => {return (e !== null)})) {
+            MatrixClientPeg.get().joinRoom(selectedRoom).done(() => {
+                console.log("ROOM JOINED !!!");
+            }, (err) => {
+                console.log("OOPS SMTH WENT WRONG !!");
+                dis.dispatch({
+                    action: 'join_room_error',
+                    err: err,
+                });
+                const msg = err.message ? err.message : JSON.stringify(err);
+                const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
+                Modal.createTrackedDialog('Failed to join room', '', ErrorDialog, {
+                    title: _t("Failed to join room"),
+                    description: msg,
+                });
+            });
+            dis.dispatch({
+                action: 'view_room',
+                room_id: rooms[0].roomId,
+            });
         } else {
             // Start a new DM chat
             createRoom({dmUserId: addrTexts[0]}).catch((err) => {
@@ -113,15 +170,6 @@ function _onStartChatFinished(shouldInvite, addrs) {
                 });
             });
         }
-    } else if (addrTexts.length === 1) {
-        // Start a new DM chat
-        createRoom({dmUserId: addrTexts[0]}).catch((err) => {
-            const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
-            Modal.createTrackedDialog('Failed to invite user', '', ErrorDialog, {
-                title: _t("Failed to invite user"),
-                description: ((err && err.message) ? err.message : _t("Operation failed")),
-            });
-        });
     } else {
         // Start multi user chat
         let room;
