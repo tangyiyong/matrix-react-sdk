@@ -118,7 +118,6 @@ class PasswordLogin extends React.Component {
     }
 
     renderLoginField(loginType, disabled) {
-      loginType = PasswordLogin.LOGIN_FIELD_EMAIL;
         const classes = {
             mx_Login_field: true,
             mx_Login_field_disabled: disabled,
@@ -211,7 +210,7 @@ class PasswordLogin extends React.Component {
             error: this.props.loginIncorrect,
         });
 
-        const loginField = this.renderLoginField(this.state.loginType, matrixIdText === '');
+        const loginField = this.renderLoginField(PasswordLogin.LOGIN_FIELD_EMAIL, matrixIdText === '');
 
         return (
             <div>
