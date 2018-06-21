@@ -99,8 +99,8 @@ function selectRoom(addrTexts) {
     // Gets all rooms which the current user is involved in
     let rooms = MatrixClientPeg.get().getRooms();
     let selectedRoom = {
-        room : Object,
-        status: String
+        room : null,
+        status: null
     };
 
     rooms.forEach(room => {
