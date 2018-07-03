@@ -120,8 +120,6 @@ const CRYPTO_SETTINGS = [
 // But for now for expedience we just hardcode them here.
 const THEMES = [
     { label: _td('Light theme'), value: 'light' },
-    { label: _td('Dark theme'), value: 'dark' },
-    { label: _td('Status.im theme'), value: 'status' },
 ];
 
 const IgnoredUser = React.createClass({
