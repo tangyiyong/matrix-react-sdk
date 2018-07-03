@@ -75,53 +75,116 @@ export function showRoomInviteDialog(roomId) {
     });
 }
 
+function viewRoomDispatcher(roomId) {
+    dis.dispatch({
+        action: 'view_room',
+        room_id: roomId,
+    });
+}
+
+function errorHandler(action, err) {
+    dis.dispatch({
+        action: action,
+        err: err,
+    });
+    const msg = err.message ? err.message : JSON.stringify(err);
+    const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
+    Modal.createTrackedDialog('Failed to join room', '', ErrorDialog, {
+        title: _t("Failed to join room"),
+        description: msg,
+    });
+}
+
+function selectRoom(addrTexts) {
+    // Gets all rooms which the current user is involved in
+    let rooms = MatrixClientPeg.get().getRooms();
+    let selectedRoom = {
+        room : null,
+        status: null
+    };
+
+    rooms.forEach(room => {
+        let members = room.currentState.members;
+
+        // Get my own "member" object
+        let me = members[MatrixClientPeg.get().credentials.userId];
+        if (addrTexts[0] in members && Object.keys(members).length <= 2 && me !== null && typeof me !== "undefined") {
+            // Get the "member" object of the user that I want to contact
+            let him = members[Object.keys(members)[0]].userId === me.userId ? members[Object.keys(members)[1]] : members[Object.keys(members)[0]];
+
+            // Colliding all the "me.membership" and "him.membership" possibilities
+
+            // "join" <=> "join" state
+            if (me.membership === "join" && him.membership === "join") {
+                selectedRoom = {room : room, status : "join-join"};
+
+            // "invite" <=> "join" state
+            // I have received an invitation from the other member
+            } else if (me.membership === "invite" && him.membership === "join") {
+                selectedRoom = {room : room, status : "invite-join"};
+
+            // "join" <=> "invite" state
+            // The other member already have an invitation
+            } else if (me.membership === "join" && him.membership === "invite") {
+                selectedRoom = {room : room, status : "join-invite"};
+
+            // "join" <=> "leave" state
+            // The other member have left/reject my invitation
+            } else if (me.membership === "join" && him.membership === "leave") {
+                selectedRoom = {room : room, status : "join-leave"};
+            } else {
+                selectedRoom = null;
+            }
+        }
+    });
+
+    return selectedRoom;
+}
+
+
 function _onStartChatFinished(shouldInvite, addrs) {
     if (!shouldInvite) return;
-
     const addrTexts = addrs.map((addr) => addr.address);
 
-    if (_isDmChat(addrTexts)) {
-        const rooms = _getDirectMessageRooms(addrTexts[0]);
-        if (rooms.length > 0) {
-            // A Direct Message room already exists for this user, so select a
-            // room from a list that is similar to the one in MemberInfo panel
-            const ChatCreateOrReuseDialog = sdk.getComponent("views.dialogs.ChatCreateOrReuseDialog");
-            const close = Modal.createTrackedDialog('Create or Reuse', '', ChatCreateOrReuseDialog, {
-                userId: addrTexts[0],
-                onNewDMClick: () => {
-                    dis.dispatch({
-                        action: 'start_chat',
-                        user_id: addrTexts[0],
+    if (addrTexts.length === 1) {
+        let selectedRoom = selectRoom(addrTexts);
+        let roomStatus = selectedRoom ? selectedRoom.status : null;
+
+        switch (roomStatus) {
+            case "join-join":
+                // Redirect to the existing room
+                viewRoomDispatcher(selectedRoom.room.roomId);
+                break;
+
+            case "invite-join":
+                // Join room then redirect to this room
+                MatrixClientPeg.get().joinRoom(selectedRoom.room.roomId).done(() => {
+                    viewRoomDispatcher(selectedRoom.room.roomId);
+                }, err => errorHandler('join_room_error', err));
+                break;
+
+            case "join-invite":
+                // Redirect to the existing room
+                viewRoomDispatcher(selectedRoom.room.roomId);
+                break;
+
+            case "join-leave":
+                // Send an invitation then redirect to the existing room
+                inviteToRoom(selectedRoom.room.roomId, addrTexts[0]);
+                viewRoomDispatcher(selectedRoom.room.roomId);
+                break;
+
+            default:
+                // Create a new room
+                createRoom({dmUserId: addrTexts[0]}).catch((err) => {
+                    const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
+                    Modal.createTrackedDialog('Failed to invite user', '', ErrorDialog, {
+                        title: _t("Failed to invite user"),
+                        description: ((err && err.message) ? err.message : _t("Operation failed")),
                     });
-                    close(true);
-                },
-                onExistingRoomSelected: (roomId) => {
-                    dis.dispatch({
-                        action: 'view_room',
-                        room_id: roomId,
-                    });
-                    close(true);
-                },
-            }).close;
-        } else {
-            // Start a new DM chat
-            createRoom({dmUserId: addrTexts[0]}).catch((err) => {
-                const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
-                Modal.createTrackedDialog('Failed to invite user', '', ErrorDialog, {
-                    title: _t("Failed to invite user"),
-                    description: ((err && err.message) ? err.message : _t("Operation failed")),
                 });
-            });
+                break;
         }
-    } else if (addrTexts.length === 1) {
-        // Start a new DM chat
-        createRoom({dmUserId: addrTexts[0]}).catch((err) => {
-            const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
-            Modal.createTrackedDialog('Failed to invite user', '', ErrorDialog, {
-                title: _t("Failed to invite user"),
-                description: ((err && err.message) ? err.message : _t("Operation failed")),
-            });
-        });
     } else {
         // Start multi user chat
         let room;
