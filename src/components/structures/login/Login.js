@@ -29,7 +29,7 @@ import SettingsStore, {SettingLevel} from "../../../settings/SettingsStore";
 
 // For validating phone numbers without country codes
 const PHONE_NUMBER_REGEX = /^[0-9\(\)\-\s]*$/;
-const TCHAP_API_URL = '/_matrix/identity/api/v1/info?medium=emil&address=';
+const TCHAP_API_URL = '/_matrix/identity/api/v1/info?medium=email&address=';
 const TCHAP_HOSTS = ['https://matrix.a.tchap.gouv.fr', 'https://matrix.e.tchap.gouv.fr', 'https://matrix.i.tchap.gouv.fr'];
 
 /**
@@ -116,7 +116,7 @@ module.exports = React.createClass({
 
         this.discoverTchapPlatform(username).then(() => {
             this._loginLogic.loginViaPassword(
-                username, phoneCountry, phoneNumber, password,
+                username, phoneCountry, phoneNumber, password
             ).then((data) => {
                 this.props.onLoggedIn(data);
             }, (error) => {
