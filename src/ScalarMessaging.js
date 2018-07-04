@@ -1,6 +1,7 @@
 /*
 Copyright 2016 OpenMarket Ltd
 Copyright 2017 Vector Creations Ltd
+Copyright 2018 New Vector Ltd
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -231,11 +232,12 @@ Example:
 }
 */
 
-const SdkConfig = require('./SdkConfig');
-const MatrixClientPeg = require("./MatrixClientPeg");
-const MatrixEvent = require("matrix-js-sdk").MatrixEvent;
-const dis = require("./dispatcher");
-const Widgets = require('./utils/widgets');
+import SdkConfig from './SdkConfig';
+import MatrixClientPeg from './MatrixClientPeg';
+import { MatrixEvent } from 'matrix-js-sdk';
+import dis from './dispatcher';
+import WidgetUtils from './utils/WidgetUtils';
+import RoomViewStore from './stores/RoomViewStore';
 import { _t } from './languageHandler';
 
 function sendResponse(event, res) {
@@ -294,12 +296,6 @@ function setWidget(event, roomId) {
     const widgetData = event.data.data; // optional
     const userWidget = event.data.userWidget;
 
-    const client = MatrixClientPeg.get();
-    if (!client) {
-        sendError(event, _t('You need to be logged in.'));
-        return;
-    }
-
     // both adding/removing widgets need these checks
     if (!widgetId || widgetUrl === undefined) {
         sendError(event, _t("Unable to create widget."), new Error("Missing required widget fields."));
@@ -326,53 +322,21 @@ function setWidget(event, roomId) {
         }
     }
 
-    let content = {
-        type: widgetType,
-        url: widgetUrl,
-        name: widgetName,
-        data: widgetData,
-    };
-
     if (userWidget) {
-        const client = MatrixClientPeg.get();
-        const userWidgets = Widgets.getUserWidgets();
-
-        // Delete existing widget with ID
-        try {
-            delete userWidgets[widgetId];
-        } catch (e) {
-            console.error(`$widgetId is non-configurable`);
-        }
-
-        // Add new widget / update
-        if (widgetUrl !== null) {
-            userWidgets[widgetId] = {
-                content: content,
-                sender: client.getUserId(),
-                stateKey: widgetId,
-                type: 'm.widget',
-                id: widgetId,
-            };
-        }
-
-        client.setAccountData('m.widgets', userWidgets).then(() => {
+        WidgetUtils.setUserWidget(widgetId, widgetType, widgetUrl, widgetName, widgetData).then(() => {
             sendResponse(event, {
                 success: true,
             });
 
             dis.dispatch({ action: "user_widget_updated" });
+        }).catch((e) => {
+            sendError(event, _t('Unable to create widget.'), e);
         });
     } else { // Room widget
         if (!roomId) {
             sendError(event, _t('Missing roomId.'), null);
         }
-
-        if (widgetUrl === null) { // widget is being deleted
-            content = {};
-        }
-        // TODO - Room widgets need to be moved to 'm.widget' state events
-        // https://docs.google.com/document/d/1uPF7XWY_dXTKVKV7jZQ2KmsI19wn9-kFRgQ1tFQP7wQ/edit?usp=sharing
-        client.sendStateEvent(roomId, "im.vector.modular.widgets", content, widgetId).done(() => {
+        WidgetUtils.setRoomWidget(roomId, widgetId, widgetType, widgetUrl, widgetName, widgetData).then(() => {
             sendResponse(event, {
                 success: true,
             });
@@ -396,21 +360,13 @@ function getWidgets(event, roomId) {
             sendError(event, _t('This room is not recognised.'));
             return;
         }
-        // TODO - Room widgets need to be moved to 'm.widget' state events
-        // https://docs.google.com/document/d/1uPF7XWY_dXTKVKV7jZQ2KmsI19wn9-kFRgQ1tFQP7wQ/edit?usp=sharing
-        const stateEvents = room.currentState.getStateEvents("im.vector.modular.widgets");
-        // Only return widgets which have required fields
-        if (room) {
-            stateEvents.forEach((ev) => {
-                if (ev.getContent().type && ev.getContent().url) {
-                    widgetStateEvents.push(ev.event); // return the raw event
-                }
-            });
-        }
+        // XXX: This gets the raw event object (I think because we can't
+        // send the MatrixEvent over postMessage?)
+        widgetStateEvents = WidgetUtils.getRoomWidgets(room).map((ev) => ev.event);
     }
 
     // Add user widgets (not linked to a specific room)
-    const userWidgets = Widgets.getUserWidgetsArray();
+    const userWidgets = WidgetUtils.getUserWidgetsArray();
     widgetStateEvents = widgetStateEvents.concat(userWidgets);
 
     sendResponse(event, widgetStateEvents);
@@ -582,19 +538,6 @@ function returnStateEvent(event, roomId, eventType, stateKey) {
     sendResponse(event, stateEvent.getContent());
 }
 
-let currentRoomId = null;
-let currentRoomAlias = null;
-
-// Listen for when a room is viewed
-dis.register(onAction);
-function onAction(payload) {
-    if (payload.action !== "view_room") {
-        return;
-    }
-    currentRoomId = payload.room_id;
-    currentRoomAlias = payload.room_alias;
-}
-
 const onMessage = function(event) {
     if (!event.origin) { // stupid chrome
         event.origin = event.originalEvent.origin;
@@ -645,80 +588,63 @@ const onMessage = function(event) {
             return;
         }
     }
-    let promise = Promise.resolve(currentRoomId);
-    if (!currentRoomId) {
-        if (!currentRoomAlias) {
-            sendError(event, _t('Must be viewing a room'));
-            return;
-        }
-        // no room ID but there is an alias, look it up.
-        console.log("Looking up alias " + currentRoomAlias);
-        promise = MatrixClientPeg.get().getRoomIdForAlias(currentRoomAlias).then((res) => {
-            return res.room_id;
-        });
+
+    if (roomId !== RoomViewStore.getRoomId()) {
+        sendError(event, _t('Room %(roomId)s not visible', {roomId: roomId}));
+        return;
     }
 
-    promise.then((viewingRoomId) => {
-        if (roomId !== viewingRoomId) {
-            sendError(event, _t('Room %(roomId)s not visible', {roomId: roomId}));
-            return;
-        }
+    // Get and set room-based widgets
+    if (event.data.action === "get_widgets") {
+        getWidgets(event, roomId);
+        return;
+    } else if (event.data.action === "set_widget") {
+        setWidget(event, roomId);
+        return;
+    }
 
-        // Get and set room-based widgets
-        if (event.data.action === "get_widgets") {
-            getWidgets(event, roomId);
-            return;
-        } else if (event.data.action === "set_widget") {
-            setWidget(event, roomId);
-            return;
-        }
+    // These APIs don't require userId
+    if (event.data.action === "join_rules_state") {
+        getJoinRules(event, roomId);
+        return;
+    } else if (event.data.action === "set_plumbing_state") {
+        setPlumbingState(event, roomId, event.data.status);
+        return;
+    } else if (event.data.action === "get_membership_count") {
+        getMembershipCount(event, roomId);
+        return;
+    } else if (event.data.action === "get_room_enc_state") {
+        getRoomEncState(event, roomId);
+        return;
+    } else if (event.data.action === "can_send_event") {
+        canSendEvent(event, roomId);
+        return;
+    }
 
-        // These APIs don't require userId
-        if (event.data.action === "join_rules_state") {
-            getJoinRules(event, roomId);
-            return;
-        } else if (event.data.action === "set_plumbing_state") {
-            setPlumbingState(event, roomId, event.data.status);
-            return;
-        } else if (event.data.action === "get_membership_count") {
-            getMembershipCount(event, roomId);
-            return;
-        } else if (event.data.action === "get_room_enc_state") {
-            getRoomEncState(event, roomId);
-            return;
-        } else if (event.data.action === "can_send_event") {
-            canSendEvent(event, roomId);
-            return;
-        }
-
-        if (!userId) {
-            sendError(event, _t('Missing user_id in request'));
-            return;
-        }
-        switch (event.data.action) {
-            case "membership_state":
-                getMembershipState(event, roomId, userId);
-                break;
-            case "invite":
-                inviteUser(event, roomId, userId);
-                break;
-            case "bot_options":
-                botOptions(event, roomId, userId);
-                break;
-            case "set_bot_options":
-                setBotOptions(event, roomId, userId);
-                break;
-            case "set_bot_power":
-                setBotPower(event, roomId, userId, event.data.level);
-                break;
-            default:
-                console.warn("Unhandled postMessage event with action '" + event.data.action +"'");
-                break;
-        }
-    }, (err) => {
-        console.error(err);
-        sendError(event, _t('Failed to lookup current room') + '.');
-    });
+    if (!userId) {
+        sendError(event, _t('Missing user_id in request'));
+        return;
+    }
+    switch (event.data.action) {
+        case "membership_state":
+            getMembershipState(event, roomId, userId);
+            break;
+        case "invite":
+            inviteUser(event, roomId, userId);
+            break;
+        case "bot_options":
+            botOptions(event, roomId, userId);
+            break;
+        case "set_bot_options":
+            setBotOptions(event, roomId, userId);
+            break;
+        case "set_bot_power":
+            setBotPower(event, roomId, userId, event.data.level);
+            break;
+        default:
+            console.warn("Unhandled postMessage event with action '" + event.data.action +"'");
+            break;
+    }
 };
 
 let listenerCount = 0;
