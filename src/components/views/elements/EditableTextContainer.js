@@ -115,9 +115,10 @@ export default class EditableTextContainer extends React.Component {
             const EditableText = sdk.getComponent('elements.EditableText');
             return (
                 <EditableText initialValue={this.state.value}
-                    placeholder={this.props.placeholder}
-                    onValueChanged={this._onValueChanged}
-                    blurToSubmit={this.props.blurToSubmit}
+                              placeholder={this.props.placeholder}
+                              onValueChanged={this._onValueChanged}
+                              blurToSubmit={this.props.blurToSubmit}
+                              editable={this.props.editable}
                 />
             );
         }
@@ -142,6 +143,9 @@ EditableTextContainer.propTypes = {
 
     /* should the input submit when focus is lost? */
     blurToSubmit: PropTypes.bool,
+
+    /* is editable ? */
+    editable: PropTypes.bool,
 };
 
 
@@ -150,4 +154,5 @@ EditableTextContainer.defaultProps = {
     placeholder: "",
     blurToSubmit: false,
     onSubmit: function(v) {return Promise.resolve(); },
+    editable: true,
 };
