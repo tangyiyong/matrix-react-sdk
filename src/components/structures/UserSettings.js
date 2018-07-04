@@ -81,6 +81,7 @@ const SIMPLE_SETTINGS = [
     { id: "VideoView.flipVideoHorizontally" },
     { id: "TagPanel.disableTagPanel" },
     { id: "enableWidgetScreenshots" },
+    { id: "RoomSubList.showEmpty" },
 ];
 
 // These settings must be defined in SettingsStore
@@ -1169,6 +1170,7 @@ module.exports = React.createClass({
             const id = "3pid-" + val.address;
             // TODO: make a separate component to avoid having to rebind onClick
             // each time we render
+            const onRemoveClick = (e) => this.onRemoveThreepidClicked(val);
             return (
                 <div className="mx_UserSettings_profileTableRow" key={pidIndex}>
                     <div className="mx_UserSettings_profileLabelCell">
@@ -1181,8 +1183,7 @@ module.exports = React.createClass({
                     </div>
                 </div>
             );
-        });
-
+        }
         const AddPhoneNumber = sdk.getComponent('views.settings.AddPhoneNumber');
         const addMsisdnSection = (
             <AddPhoneNumber key="_addMsisdn" onThreepidAdded={this._refreshFromServer} />
