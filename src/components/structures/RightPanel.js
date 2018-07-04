@@ -31,6 +31,9 @@ import GroupStore from '../../stores/GroupStore';
 
 import { formatCount } from '../../utils/FormattingUtils';
 
+import DMRoomMap from 'matrix-react-sdk/lib/utils/DMRoomMap';
+import MatrixClientPeg from 'matrix-react-sdk/lib/MatrixClientPeg';
+
 class HeaderButton extends React.Component {
     constructor() {
         super();
@@ -257,6 +260,9 @@ module.exports = React.createClass({
     },
 
     render: function() {
+        const dmRoomMap = new DMRoomMap(MatrixClientPeg.get());
+        let isDMRoom = Boolean(dmRoomMap.getUserIdForRoomId(this.props.roomId));
+
         const MemberList = sdk.getComponent('rooms.MemberList');
         const MemberInfo = sdk.getComponent('rooms.MemberInfo');
         const NotificationPanel = sdk.getComponent('structures.NotificationPanel');
@@ -286,7 +292,7 @@ module.exports = React.createClass({
                 isUserInRoom = room.hasMembershipState(this.context.matrixClient.credentials.userId, 'join');
             }
 
-            if (isUserInRoom) {
+            if (isUserInRoom && !isDMRoom) {
                 inviteGroup =
                     <AccessibleButton className="mx_RightPanel_invite" onClick={this.onInviteButtonClick}>
                         <div className="mx_RightPanel_icon" >

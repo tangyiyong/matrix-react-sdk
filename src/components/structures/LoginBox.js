@@ -75,9 +75,6 @@ module.exports = React.createClass({
                     <AccessibleButton className="mx_LoginBox_loginButton" element="button" onClick={this.onLoginClick}>
                         { _t("Login") }
                     </AccessibleButton>
-                    <AccessibleButton className="mx_LoginBox_registerButton" element="button" onClick={this.onRegisterClick}>
-                        { _t("Register") }
-                    </AccessibleButton>
                 </div>
             );
         }

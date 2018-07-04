@@ -19,6 +19,7 @@ import MatrixClientPeg from '../../../MatrixClientPeg';
 import {instanceForInstanceId} from '../../../utils/DirectoryUtils';
 
 const DEFAULT_ICON_URL = "img/network-matrix.svg";
+const SERVER_LIST = ["a.tchap.gouv.fr", "e.tchap.gouv.fr", "i.tchap.gouv.fr"];
 
 export default class NetworkDropdown extends React.Component {
     constructor(props) {
@@ -139,6 +140,12 @@ export default class NetworkDropdown extends React.Component {
             servers.unshift(MatrixClientPeg.getHomeServerName());
         }
 
+        SERVER_LIST.forEach(s => {
+            if (!servers.includes(s)) {
+                servers.unshift(s);
+            }
+        });
+
         // For our own HS, we can use the instance_ids given in the third party protocols
         // response to get the server to filter the room list by network for us.
         // We can't get thirdparty protocols for remote server yet though, so for those
@@ -184,15 +191,11 @@ export default class NetworkDropdown extends React.Component {
         let span_class;
         let key;
 
-        if (!instance && includeAll) {
+        if (!instance) {
             key = server;
             name = server;
+            icon = <img src="img/logos/tchap-logo.svg" />;
             span_class = 'mx_NetworkDropdown_menu_all';
-        } else if (!instance) {
-            key = server + '_all';
-            name = 'Matrix';
-            icon = <img src="img/network-matrix.svg" />;
-            span_class = 'mx_NetworkDropdown_menu_network';
         } else {
             key = server + '_inst_' + instance.instance_id;
             const imgUrl = instance.icon ?
@@ -222,7 +225,7 @@ export default class NetworkDropdown extends React.Component {
             </div>;
             current_value = <input type="text" className="mx_NetworkDropdown_networkoption"
                 ref={this.collectInputTextBox} onKeyUp={this.onInputKeyUp}
-                placeholder="matrix.org" // 'matrix.org' as an example of an HS name
+                placeholder="Salons Public" // 'matrix.org' as an example of an HS name
             />
         } else {
             const instance = instanceForInstanceId(this.props.protocols, this.state.selectedInstanceId);

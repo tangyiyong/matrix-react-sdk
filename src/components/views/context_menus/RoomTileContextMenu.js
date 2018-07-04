@@ -312,34 +312,12 @@ module.exports = React.createClass({
             'mx_RoomTileContextMenu_tag_fieldDisabled': false,
         });
 
-        const lowPriorityClasses = classNames({
-            'mx_RoomTileContextMenu_tag_field': true,
-            'mx_RoomTileContextMenu_tag_fieldSet': this.state.isLowPriority,
-            'mx_RoomTileContextMenu_tag_fieldDisabled': false,
-        });
-
-        const dmClasses = classNames({
-            'mx_RoomTileContextMenu_tag_field': true,
-            'mx_RoomTileContextMenu_tag_fieldSet': this.state.isDirectMessage,
-            'mx_RoomTileContextMenu_tag_fieldDisabled': false,
-        });
-
         return (
             <div>
                 <div className={favouriteClasses} onClick={this._onClickFavourite} >
                     <img className="mx_RoomTileContextMenu_tag_icon" src="img/icon_context_fave.svg" width="15" height="15" />
                     <img className="mx_RoomTileContextMenu_tag_icon_set" src="img/icon_context_fave_on.svg" width="15" height="15" />
                     { _t('Favourite') }
-                </div>
-                <div className={lowPriorityClasses} onClick={this._onClickLowPriority} >
-                    <img className="mx_RoomTileContextMenu_tag_icon" src="img/icon_context_low.svg" width="15" height="15" />
-                    <img className="mx_RoomTileContextMenu_tag_icon_set" src="img/icon_context_low_on.svg" width="15" height="15" />
-                    { _t('Low Priority') }
-                </div>
-                <div className={dmClasses} onClick={this._onClickDM} >
-                    <img className="mx_RoomTileContextMenu_tag_icon" src="img/icon_context_person.svg" width="15" height="15" />
-                    <img className="mx_RoomTileContextMenu_tag_icon_set" src="img/icon_context_person_on.svg" width="15" height="15" />
-                    { _t('Direct Chat') }
                 </div>
             </div>
         );
