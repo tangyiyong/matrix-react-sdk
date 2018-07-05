@@ -188,22 +188,18 @@ module.exports = React.createClass({
         };
     },
 
+    getAppVersion: function() {
+        let data = require('../../../package.json');
+        this.setState({
+            vectorVersion: data.appVersion
+        });
+    },
+
     componentWillMount: function() {
         this._unmounted = false;
         this._addThreepid = null;
 
-        if (PlatformPeg.get()) {
-            Promise.resolve().then(() => {
-                return PlatformPeg.get().getAppVersion();
-            }).done((appVersion) => {
-                if (this._unmounted) return;
-                this.setState({
-                    vectorVersion: appVersion,
-                });
-            }, (e) => {
-                console.log("Failed to fetch app version", e);
-            });
-        }
+        this.getAppVersion();
 
         this._refreshMediaDevices();
         this._refreshIgnoredUsers();
@@ -1312,7 +1308,7 @@ module.exports = React.createClass({
                             : REACT_SDK_VERSION
                         }<br />
                         { _t('riot-web version:') } { (this.state.vectorVersion !== undefined)
-                            ? gHVersionLabel('vector-im/riot-web', this.state.vectorVersion)
+                            ? this.state.vectorVersion
                             : 'unknown'
                         }<br />
                         { _t("olm version:") } { olmVersionString }<br />
