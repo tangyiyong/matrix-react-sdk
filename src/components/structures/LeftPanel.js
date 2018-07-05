@@ -213,6 +213,9 @@ var LeftPanel = React.createClass({
             <div className={containerClasses}>
                 { tagPanel }
                 <aside className={classes} onKeyDown={ this._onKeyDown } onFocus={ this._onFocus } onBlur={ this._onBlur }>
+                    <div className="tc_marianne">
+                        <img src="img/logos/logo_rep_fr.svg" alt="République Française" width="100" height="50" />
+                    </div>
                     { topBox }
                     <CallPreview ConferenceHandler={VectorConferenceHandler} />
                     <RoomList

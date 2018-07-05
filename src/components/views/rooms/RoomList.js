@@ -704,19 +704,6 @@ module.exports = React.createClass({
                     }
                 }) }
 
-                <RoomSubList list={self.state.lists['m.lowpriority']}
-                             label={_t('Low priority')}
-                             tagName="m.lowpriority"
-                             emptyContent={this._getEmptyContent('m.lowpriority')}
-                             editable={true}
-                             order="recent"
-                             incomingCall={self.state.incomingCall}
-                             collapsed={self.props.collapsed}
-                             searchFilter={self.props.searchFilter}
-                             onHeaderClick={self.onSubListHeaderClick}
-                             onShowMoreRooms={self.onShowMoreRooms}
-                             showEmpty={showEmpty} />
-
                 <RoomSubList list={self.state.lists['im.vector.fake.archived']}
                              emptyContent={self.props.collapsed ? null :
                                  <div className="mx_RoomList_emptySubListTip_container">

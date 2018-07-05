@@ -127,3 +127,11 @@ limitations under the License.
         margin-top: 12px;
     }
 }
+
+.tc_marianne {
+    margin-left: 16px;
+    margin-right: 16px;
+    padding-top: 2px;
+    padding-left: calc((50% - 50px) - 16px);
+    border-bottom: 1px solid rgb(77, 63, 125);
+}

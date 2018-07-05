@@ -194,7 +194,7 @@ export default class NetworkDropdown extends React.Component {
         if (!instance) {
             key = server;
             name = server;
-            icon = <img src="img/logos/tchap-logo.svg" />;
+            icon = <img src="themes/tchap/img/logos/tchap-logo.svg" />;
             span_class = 'mx_NetworkDropdown_menu_all';
         } else {
             key = server + '_inst_' + instance.instance_id;

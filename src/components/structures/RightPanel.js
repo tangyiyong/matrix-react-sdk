@@ -31,8 +31,8 @@ import GroupStore from '../../stores/GroupStore';
 
 import { formatCount } from '../../utils/FormattingUtils';
 
-import DMRoomMap from 'matrix-react-sdk/lib/utils/DMRoomMap';
-import MatrixClientPeg from 'matrix-react-sdk/lib/MatrixClientPeg';
+import DMRoomMap from '../../utils/DMRoomMap';
+import MatrixClientPeg from '../../MatrixClientPeg';
 
 class HeaderButton extends React.Component {
     constructor() {
