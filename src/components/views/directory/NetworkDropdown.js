@@ -19,7 +19,20 @@ import MatrixClientPeg from '../../../MatrixClientPeg';
 import {instanceForInstanceId} from '../../../utils/DirectoryUtils';
 
 const DEFAULT_ICON_URL = "img/network-matrix.svg";
-const SERVER_LIST = ["a.tchap.gouv.fr", "e.tchap.gouv.fr", "i.tchap.gouv.fr"];
+const SERVER_LIST = [
+    'dev-durable.tchap.gouv.fr',
+    'education.tchap.gouv.fr',
+    'culture.tchap.gouv.fr',
+    'dinum.tchap.gouv.fr',
+    'intradef.tchap.gouv.fr',
+    'diplomatie.tchap.gouv.fr',
+    'justice.tchap.gouv.fr',
+    'agriculture.tchap.gouv.fr',
+    'interieur.tchap.gouv.fr',
+    'social.tchap.gouv.fr',
+    'finances.tchap.gouv.fr',
+    'ssi.tchap.gouv.fr',
+    'pm.tchap.gouv.fr'];
 
 export default class NetworkDropdown extends React.Component {
     constructor(props) {
@@ -224,8 +237,8 @@ export default class NetworkDropdown extends React.Component {
                 {menu_options}
             </div>;
             current_value = <input type="text" className="mx_NetworkDropdown_networkoption"
-                ref={this.collectInputTextBox} onKeyUp={this.onInputKeyUp}
-                placeholder="Salons Public" // 'matrix.org' as an example of an HS name
+                                   ref={this.collectInputTextBox} onKeyUp={this.onInputKeyUp}
+                                   placeholder="Salons Public" // 'matrix.org' as an example of an HS name
             />
         } else {
             const instance = instanceForInstanceId(this.props.protocols, this.state.selectedInstanceId);
