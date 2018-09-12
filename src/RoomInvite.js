@@ -101,7 +101,8 @@ function selectRoom(addrTexts) {
     let rooms = MatrixClientPeg.get().getRooms();
     let selectedRoom = {
         room : null,
-        status: null
+        status: null,
+        date: null
     };
 
     rooms.forEach(room => {
@@ -112,27 +113,36 @@ function selectRoom(addrTexts) {
         if (addrTexts[0] in members && Object.keys(members).length <= 2 && me !== null && typeof me !== "undefined") {
             // Get the "member" object of the user that I want to contact
             let him = members[Object.keys(members)[0]].userId === me.userId ? members[Object.keys(members)[1]] : members[Object.keys(members)[0]];
+            let roomCreateEvent = room.currentState.getStateEvents("m.room.create");
+            let roomCreateEventDate = roomCreateEvent[0].event.origin_server_ts;
 
             // Colliding all the "me.membership" and "him.membership" possibilities
 
             // "join" <=> "join" state
             if (me.membership === "join" && him.membership === "join") {
-                selectedRoom = {room : room, status : "join-join"};
+                if (selectedRoom.date === null || roomCreateEventDate < selectedRoom.date) {
+                    selectedRoom = {room : room, status : "join-join", date : roomCreateEventDate};
+                }
 
             // "invite" <=> "join" state
             // I have received an invitation from the other member
             } else if (me.membership === "invite" && him.membership === "join") {
-                selectedRoom = {room : room, status : "invite-join"};
-
+                if (selectedRoom.date === null || roomCreateEventDate < selectedRoom.date) {
+                    selectedRoom = {room: room, status: "invite-join", date: roomCreateEventDate};
+                }
             // "join" <=> "invite" state
             // The other member already have an invitation
             } else if (me.membership === "join" && him.membership === "invite") {
-                selectedRoom = {room : room, status : "join-invite"};
+                if (selectedRoom.date === null || roomCreateEventDate < selectedRoom.date) {
+                    selectedRoom = {room : room, status : "join-invite", date : roomCreateEventDate};
+                }
 
             // "join" <=> "leave" state
             // The other member have left/reject my invitation
             } else if (me.membership === "join" && him.membership === "leave") {
-                selectedRoom = {room : room, status : "join-leave"};
+                if (selectedRoom.date === null || roomCreateEventDate < selectedRoom.date) {
+                    selectedRoom = {room : room, status : "join-leave", date : roomCreateEventDate};
+                }
             } else {
                 selectedRoom = null;
             }
