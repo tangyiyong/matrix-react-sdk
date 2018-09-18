@@ -52,12 +52,27 @@ module.exports = React.createClass({
     getInitialState: function() {
         return {
             publicRooms: [],
+            allPublicRooms: [],
             loading: true,
             protocolsLoading: true,
             instanceId: null,
             includeAll: false,
             roomServer: null,
             filterString: null,
+            serverList: [
+                'dev-durable.tchap.gouv.fr',
+                'education.tchap.gouv.fr',
+                'culture.tchap.gouv.fr',
+                'dinum.tchap.gouv.fr',
+                'intradef.tchap.gouv.fr',
+                'diplomatie.tchap.gouv.fr',
+                'justice.tchap.gouv.fr',
+                'agriculture.tchap.gouv.fr',
+                'interieur.tchap.gouv.fr',
+                'social.tchap.gouv.fr',
+                'finances.tchap.gouv.fr',
+                'ssi.tchap.gouv.fr',
+                'pm.tchap.gouv.fr']
         }
     },
 
@@ -87,6 +102,20 @@ module.exports = React.createClass({
                 description: _t('The Home Server may be too old to support third party networks'),
             });
         });
+
+        let serverList = this.state.serverList;
+
+        for (let i = 0; i <= serverList.length; i++) {
+            let opts = {};
+            opts.server = serverList[i];
+            MatrixClientPeg.get().publicRooms(opts).then((data) => {
+                this.setState((st) => {
+                    st.allPublicRooms.push(...data.chunk);
+                    st.loading = false;
+                    return st;
+                });
+            });
+        }
 
         // dis.dispatch({
         //     action: 'panel_disable',
@@ -176,6 +205,7 @@ module.exports = React.createClass({
             }
 
             this.setState({ loading: false });
+            if (my_server === "all.tchap.gouv.fr") return;
             console.error("Failed to get publicRooms: %s", JSON.stringify(err));
             var ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
             Modal.createTrackedDialog('Failed to get public room list', '', ErrorDialog, {
@@ -385,9 +415,15 @@ module.exports = React.createClass({
     getRows: function() {
         var BaseAvatar = sdk.getComponent('avatars.BaseAvatar');
 
-        if (!this.state.publicRooms) return [];
+        if (!this.state.publicRooms || !this.state.allPublicRooms) return [];
 
-        var rooms = this.state.publicRooms;
+        var rooms = null;
+        if (this.state.roomServer === "all.tchap.gouv.fr") {
+            rooms = this.state.allPublicRooms;
+        } else {
+            rooms = this.state.publicRooms;
+        }
+
         var rows = [];
         var self = this;
         var guestRead, guestJoin, perms;
@@ -423,10 +459,10 @@ module.exports = React.createClass({
                 >
                     <td className="mx_RoomDirectory_roomAvatar">
                         <BaseAvatar width={24} height={24} resizeMethod='crop'
-                            name={ name } idName={ name }
-                            url={ ContentRepo.getHttpUriForMxc(
-                                    MatrixClientPeg.get().getHomeserverUrl(),
-                                    rooms[i].avatar_url, 24, 24, "crop") } />
+                                    name={ name } idName={ name }
+                                    url={ ContentRepo.getHttpUriForMxc(
+                                        MatrixClientPeg.get().getHomeserverUrl(),
+                                        rooms[i].avatar_url, 24, 24, "crop") } />
                     </td>
                     <td className="mx_RoomDirectory_roomDescription">
                         <div className="mx_RoomDirectory_name">{ name }</div>&nbsp;
@@ -434,7 +470,6 @@ module.exports = React.createClass({
                         <div className="mx_RoomDirectory_topic"
                              onClick={ function(e) { e.stopPropagation() } }
                              dangerouslySetInnerHTML={{ __html: topic }}/>
-                        <div className="mx_RoomDirectory_alias">{ get_display_alias_for_room(rooms[i]) }</div>
                     </td>
                     <td className="mx_RoomDirectory_roomMemberCount">
                         { rooms[i].num_joined_members }
@@ -504,7 +539,12 @@ module.exports = React.createClass({
                 <Loader />
             </div>;
         } else {
+            console.log(`===> Room Server : ${this.state.roomServer}`);
             const rows = this.getRows();
+
+            console.log("===> rows");
+            console.log(rows);
+
             // we still show the scrollpanel, at least for now, because
             // otherwise we don't fetch more because we don't get a fill
             // request from the scrollpanel because there isn't one
@@ -514,17 +554,17 @@ module.exports = React.createClass({
             } else {
                 scrollpanel_content = <table ref="directory_table" className="mx_RoomDirectory_table">
                     <tbody>
-                        { this.getRows() }
+                    { rows }
                     </tbody>
                 </table>;
             }
             const ScrollPanel = sdk.getComponent("structures.ScrollPanel");
             content = <ScrollPanel ref={this.collectScrollPanel}
-                className="mx_RoomDirectory_tableWrapper"
-                onFillRequest={ this.onFillRequest }
-                stickyBottom={false}
-                startAtBottom={false}
-                onResize={function(){}}
+                                   className="mx_RoomDirectory_tableWrapper"
+                                   onFillRequest={ this.onFillRequest }
+                                   stickyBottom={false}
+                                   startAtBottom={false}
+                                   onResize={function(){}}
             >
                 { scrollpanel_content }
             </ScrollPanel>;
