@@ -32,7 +32,8 @@ const SERVER_LIST = [
     'social.tchap.gouv.fr',
     'finances.tchap.gouv.fr',
     'ssi.tchap.gouv.fr',
-    'pm.tchap.gouv.fr'];
+    'pm.tchap.gouv.fr',
+    'all.tchap.gouv.fr'];
 
 export default class NetworkDropdown extends React.Component {
     constructor(props) {
@@ -51,7 +52,7 @@ export default class NetworkDropdown extends React.Component {
 
         this.inputTextBox = null;
 
-        const server = MatrixClientPeg.getHomeServerName();
+        const server = "all.tchap.gouv.fr";
         this.state = {
             expanded: false,
             selectedServer: server,
