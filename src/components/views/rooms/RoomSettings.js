@@ -104,7 +104,7 @@ const BannedUser = React.createClass({
             <li>
                 { unbanButton }
                 <span title={_t("Banned by %(displayName)s", {displayName: this.props.by})}>
-                    <strong>{ this.props.member.name }</strong> { this.props.member.userId }
+                    <strong>{ this.props.member.name }</strong>
                     { this.props.reason ? " " +_t('Reason') + ": " + this.props.reason : "" }
                 </span>
             </li>
@@ -719,14 +719,14 @@ module.exports = React.createClass({
                 if (userLevels[user] > defaultUserLevel) { // privileged
                     privilegedUsers.push(<li className="mx_RoomSettings_userLevel" key={user}>
                         { _t("%(user)s is a %(userRole)s", {
-                            user: user,
+                            user: cli.getUser(user).displayName,
                             userRole: <PowerSelector value={userLevels[user]} disabled={true} />,
                         }) }
                     </li>);
                 } else if (userLevels[user] < defaultUserLevel) { // muted
                     mutedUsers.push(<li className="mx_RoomSettings_userLevel" key={user}>
                         { _t("%(user)s is a %(userRole)s", {
-                            user: user,
+                            user: cli.getUser(user).displayName,
                             userRole: <PowerSelector value={userLevels[user]} disabled={true} />,
                         }) }
                     </li>);
