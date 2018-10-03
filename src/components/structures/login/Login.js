@@ -29,7 +29,8 @@ import SettingsStore from "../../../settings/SettingsStore";
 // For validating phone numbers without country codes
 const PHONE_NUMBER_REGEX = /^[0-9()\-\s]*$/;
 const TCHAP_API_URL = '/_matrix/identity/api/v1/info?medium=email&address=';
-const TCHAP_HOSTS = ['https://matrix.a.tchap.gouv.fr', 'https://matrix.e.tchap.gouv.fr', 'https://matrix.i.tchap.gouv.fr'];
+const TCHAP_HOSTS_BASE = 'https://matrix.';
+const TCHAP_HOSTS = ['dev-durable.tchap.gouv.fr', 'education.tchap.gouv.fr', 'culture.tchap.gouv.fr'];
 
 /**
  * A wire component which glues together login UI components and Login logic
@@ -104,11 +105,13 @@ module.exports = React.createClass({
 
     discoverTchapPlatform: async function(username) {
         const selectedUrl = TCHAP_HOSTS[(Math.floor(Math.random() * (TCHAP_HOSTS.length)) + 1) - 1];
-        const res = await fetch(selectedUrl + TCHAP_API_URL + username);
+
+        const res = await fetch(TCHAP_HOSTS_BASE + selectedUrl + TCHAP_API_URL + username).catch(err => console.error(err));
         const data = await res.json();
+
         this.setState({
-            enteredHomeserverUrl: 'https://matrix.' + data.hs,
-            enteredIdentityServerUrl: 'https://matrix.' + data.hs,
+            enteredHomeserverUrl: TCHAP_HOSTS_BASE + data.hs,
+            enteredIdentityServerUrl: TCHAP_HOSTS_BASE + data.hs,
         });
         this._initLoginLogic(this.state.enteredHomeserverUrl, this.state.enteredIdentityServerUrl);
     },
@@ -177,7 +180,7 @@ module.exports = React.createClass({
     },
 
     onCasLogin: function() {
-      this._loginLogic.redirectToCas();
+        this._loginLogic.redirectToCas();
     },
 
     _onLoginAsGuestClick: function() {
@@ -287,7 +290,7 @@ module.exports = React.createClass({
             this.setState({
                 errorText: _t(
                     "This homeserver doesn't offer any login flows which are " +
-                        "supported by this client.",
+                    "supported by this client.",
                 ),
             });
         }, function(err) {
@@ -323,12 +326,12 @@ module.exports = React.createClass({
         }
 
         let errorText = _t("Error: Problem communicating with the given homeserver.") +
-                (errCode ? " (" + errCode + ")" : "");
+            (errCode ? " (" + errCode + ")" : "");
 
         if (err.cors === 'rejected') {
             if (window.location.protocol === 'https:' &&
                 (this.state.enteredHomeserverUrl.startsWith("http:") ||
-                 !this.state.enteredHomeserverUrl.startsWith("http"))
+                    !this.state.enteredHomeserverUrl.startsWith("http"))
             ) {
                 errorText = <span>
                     { _t("Can't connect to homeserver via HTTP when an HTTPS URL is in your browser bar. " +
@@ -378,18 +381,18 @@ module.exports = React.createClass({
         const PasswordLogin = sdk.getComponent('login.PasswordLogin');
         return (
             <PasswordLogin
-               onSubmit={this.onPasswordLogin}
-               onError={this.onPasswordLoginError}
-               initialUsername={this.state.username}
-               initialPhoneCountry={this.state.phoneCountry}
-               initialPhoneNumber={this.state.phoneNumber}
-               onUsernameChanged={this.onUsernameChanged}
-               onPhoneCountryChanged={this.onPhoneCountryChanged}
-               onPhoneNumberChanged={this.onPhoneNumberChanged}
-               onForgotPasswordClick={this.props.onForgotPasswordClick}
-               loginIncorrect={this.state.loginIncorrect}
-               hsUrl={this.state.enteredHomeserverUrl}
-               />
+                onSubmit={this.onPasswordLogin}
+                onError={this.onPasswordLoginError}
+                initialUsername={this.state.username}
+                initialPhoneCountry={this.state.phoneCountry}
+                initialPhoneNumber={this.state.phoneNumber}
+                onUsernameChanged={this.onUsernameChanged}
+                onPhoneCountryChanged={this.onPhoneCountryChanged}
+                onPhoneNumberChanged={this.onPhoneNumberChanged}
+                onForgotPasswordClick={this.props.onForgotPasswordClick}
+                loginIncorrect={this.state.loginIncorrect}
+                hsUrl={this.state.enteredHomeserverUrl}
+            />
         );
     },
 
@@ -421,13 +424,13 @@ module.exports = React.createClass({
 
         if (!SdkConfig.get()['disable_custom_urls']) {
             serverConfig = <ServerConfig ref="serverConfig"
-                withToggleButton={true}
-                customHsUrl={this.props.customHsUrl}
-                customIsUrl={this.props.customIsUrl}
-                defaultHsUrl={this.props.defaultHsUrl}
-                defaultIsUrl={this.props.defaultIsUrl}
-                onServerConfigChange={this.onServerConfigChange}
-                delayTimeMs={1000} />;
+                                         withToggleButton={true}
+                                         customHsUrl={this.props.customHsUrl}
+                                         customIsUrl={this.props.customIsUrl}
+                                         defaultHsUrl={this.props.defaultHsUrl}
+                                         defaultIsUrl={this.props.defaultIsUrl}
+                                         onServerConfigChange={this.onServerConfigChange}
+                                         delayTimeMs={1000} />;
         }
 
         // FIXME: remove status.im theme tweaks
