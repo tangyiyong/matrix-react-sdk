@@ -285,6 +285,8 @@
     "Room %(roomId)s not visible": "Room %(roomId)s not visible",
     "Room Colour": "Room Color",
     "Room name (optional)": "Room name (optional)",
+    "Room name (required)": "Room name (required)",
+    "Room name is required": "Room name is required",
     "Rooms": "Rooms",
     "Save": "Save",
     "Scroll to bottom of page": "Scroll to bottom of page",

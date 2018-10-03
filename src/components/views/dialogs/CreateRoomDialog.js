@@ -19,6 +19,7 @@ import PropTypes from 'prop-types';
 import sdk from '../../../index';
 import SdkConfig from '../../../SdkConfig';
 import { _t } from '../../../languageHandler';
+const Modal = require('../../../Modal');
 
 export default React.createClass({
     displayName: 'CreateRoomDialog',
@@ -33,7 +34,15 @@ export default React.createClass({
     },
 
     onOk: function() {
-        this.props.onFinished(true, this.refs.textinput.value, this.refs.checkbox.checked);
+        if (this.refs.textinput.value === "") {
+            const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
+            Modal.createTrackedDialog('Room name is needed', '', ErrorDialog, {
+                title: _t("Error"),
+                description: _t("Room name is required"),
+            });
+        } else {
+            this.props.onFinished(true, this.refs.textinput.value, this.refs.checkbox.checked);
+        }
     },
 
     onCancel: function() {
@@ -50,7 +59,7 @@ export default React.createClass({
                 <form onSubmit={this.onOk}>
                     <div className="mx_Dialog_content">
                         <div className="mx_CreateRoomDialog_label">
-                            <label htmlFor="textinput"> { _t('Room name (optional)') } </label>
+                            <label htmlFor="textinput"> { _t('Room name (required)') } </label>
                         </div>
                         <div className="mx_CreateRoomDialog_input_container">
                             <input id="textinput" ref="textinput" className="mx_CreateRoomDialog_input" autoFocus={true} />
