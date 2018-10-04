@@ -114,7 +114,7 @@ function selectRoom(addrTexts) {
             // Get the "member" object of the user that I want to contact
             let him = members[Object.keys(members)[0]].userId === me.userId ? members[Object.keys(members)[1]] : members[Object.keys(members)[0]];
             let roomCreateEvent = room.currentState.getStateEvents("m.room.create");
-            let roomCreateEventDate = roomCreateEvent[0].event.origin_server_ts;
+            let roomCreateEventDate = roomCreateEvent[0] ? roomCreateEvent[0].event.origin_server_ts : 0;
 
             // Colliding all the "me.membership" and "him.membership" possibilities
 
