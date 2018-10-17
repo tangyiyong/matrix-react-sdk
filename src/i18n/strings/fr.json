@@ -444,6 +444,7 @@
     "\"%(RoomName)s\" contains devices that you haven't seen before.": "\"%(RoomName)s\" contient des appareils que vous n'avez encore jamais vus.",
     "Unknown devices": "Appareils inconnus",
     "Unknown Address": "Adresse inconnue",
+    "The file %(file)s was rejected by the security policy": "Le fichier %(file)s a été filtré par la politique de sécurité",
     "Unblacklist": "Supprimer de la liste noire",
     "Blacklist": "Ajouter à la liste noire",
     "Unverify": "Annuler la vérification",

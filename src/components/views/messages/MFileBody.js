@@ -200,6 +200,7 @@ module.exports = React.createClass({
     getInitialState: function() {
         return {
             decryptedBlob: (this.props.decryptedBlob ? this.props.decryptedBlob : null),
+            mcsError: false,
         };
     },
 
@@ -246,6 +247,22 @@ module.exports = React.createClass({
         this.id = nextMountId++;
         mounts[this.id] = this;
         this.tint();
+        const content = this.props.mxEvent.getContent();
+        decryptFile(content.file).then((blob) => {
+            if (blob.size === 0) {
+                this.setState({
+                    mcsError: true
+                });
+            } else {
+                this.setState({
+                    decryptedBlob: blob
+                });
+            }
+        }).catch((err) => {
+            console.warn("Unable to decrypt attachment: ", err);
+        }).finally(() => {
+        });
+
     },
 
     componentWillUnmount: function() {
@@ -279,7 +296,14 @@ module.exports = React.createClass({
         const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
 
         if (isEncrypted) {
-            if (this.state.decryptedBlob === null) {
+            if (this.state.mcsError === true) {
+                return (
+                    <span className="mx_MFileBody" ref="body">
+                    <img src="img/warning.svg" width="16" height="16" />
+                        { _t("The file %(file)s was rejected by the security policy", {file: content.body}) }
+                </span>
+                );
+            } else if (this.state.decryptedBlob === null) {
                 // Need to decrypt the attachment
                 // Wait for the user to click on the link before downloading
                 // and decrypting the attachment.
