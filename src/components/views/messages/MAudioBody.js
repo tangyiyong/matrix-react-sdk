@@ -21,6 +21,7 @@ import MFileBody from './MFileBody';
 
 import MatrixClientPeg from '../../../MatrixClientPeg';
 import { decryptFile } from '../../../utils/DecryptFile';
+import Promise from 'bluebird';
 import { _t } from '../../../languageHandler';
 
 export default class MAudioBody extends React.Component {
@@ -51,21 +52,25 @@ export default class MAudioBody extends React.Component {
     componentDidMount() {
         const content = this.props.mxEvent.getContent();
         if (content.file !== undefined && this.state.decryptedUrl === null) {
+            let thumbnailPromise = Promise.resolve(null);
             let decryptedBlob;
-            decryptFile(content.file).then(function(blob) {
-                decryptedBlob = blob;
-                return URL.createObjectURL(decryptedBlob);
-            }).done((url) => {
-                this.setState({
-                    decryptedUrl: url,
-                    decryptedBlob: decryptedBlob,
+            thumbnailPromise.then(() => {
+                return decryptFile(content.file).then(function(blob) {
+                    decryptedBlob = blob;
+                    return URL.createObjectURL(blob);
+                }).then((contentUrl) => {
+                    this.setState({
+                        decryptedUrl: contentUrl,
+                        decryptedBlob: decryptedBlob,
+                    });
                 });
-            }, (err) => {
+            }).catch((err) => {
                 console.warn("Unable to decrypt attachment: ", err);
+                // Set a placeholder image when we can't decrypt the image.
                 this.setState({
                     error: err,
                 });
-            });
+            }).done();
         }
     }
 
