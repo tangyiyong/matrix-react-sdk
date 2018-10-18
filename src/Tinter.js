@@ -59,9 +59,9 @@ class Tinter {
         // The default colour keys to be replaced as referred to in CSS
         // (should be overridden by .mx_theme_accentColor and .mx_theme_secondaryAccentColor)
         this.keyRgb = [
-            "rgb(77, 63, 125)", // Vector Green
-            "rgb(102, 92, 144)", // Vector Light Green
-            "rgb(102, 92, 144)", // roomsublist-label-bg-color (20% Green overlaid on Light Green)
+            "rgb(55, 76, 114)", // Vector Green
+            "rgb(22, 45, 88)", // Vector Light Green
+            "rgb(22, 45, 88)", // roomsublist-label-bg-color (20% Green overlaid on Light Green)
         ];
 
         // Some algebra workings for calculating the tint % of Vector Green & Light Green
@@ -73,9 +73,9 @@ class Tinter {
 
         // The colour keys to be replaced as referred to in SVGs
         this.keyHex = [
-            "#4D3F7D", // Vector Green
-            "#665C90", // Vector Light Green
-            "#665C90", // roomsublist-label-bg-color (20% Green overlaid on Light Green)
+            "#374c72", // Vector Green
+            "#162d58", // Vector Light Green
+            "#162d58", // roomsublist-label-bg-color (20% Green overlaid on Light Green)
             "#FFFFFF", // white highlights of the SVGs (for switching to dark theme)
             "#000000", // black lowlights of the SVGs (for switching to dark theme)
         ];
