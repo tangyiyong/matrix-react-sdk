@@ -944,9 +944,6 @@ module.exports = withMatrixClient(React.createClass({
                     <EmojiText element="h2">{ memberName }</EmojiText>
 
                     <div className="mx_MemberInfo_profile">
-                        <div className="mx_MemberInfo_profileField">
-                            { this.props.member.userId }
-                        </div>
                         { roomMemberDetails }
                     </div>
 

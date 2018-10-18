@@ -73,7 +73,7 @@ export default React.createClass({
         const TintableSvg = sdk.getComponent("elements.TintableSvg");
 
         const nameClasses = classNames({
-            "mx_AddressTile_name": true,
+            "mx_AddressTile_name": false,
             "mx_AddressTile_justified": this.props.justified,
         });
 
@@ -88,10 +88,7 @@ export default React.createClass({
             info = (
                 <div className="mx_AddressTile_mx">
                     <div className={nameClasses}>{ name }</div>
-                    { this.props.showAddress ?
-                        <div className={idClasses}>{ address.address }</div> :
-                        <div />
-                    }
+                    <div />
                 </div>
             );
         } else if (isMatrixAddress) {

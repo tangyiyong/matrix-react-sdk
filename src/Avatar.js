@@ -52,6 +52,7 @@ module.exports = {
 
     defaultAvatarUrlForString: function(s) {
         const images = ['374c72', '50e2c2', 'f4c371'];
+
         let total = 0;
         for (let i = 0; i < s.length; ++i) {
             total += s.charCodeAt(i);
