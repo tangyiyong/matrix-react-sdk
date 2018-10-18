@@ -201,6 +201,7 @@ module.exports = React.createClass({
         return {
             decryptedBlob: (this.props.decryptedBlob ? this.props.decryptedBlob : null),
             mcsError: false,
+            error: null
         };
     },
 
@@ -260,7 +261,10 @@ module.exports = React.createClass({
             }
         }).catch((err) => {
             console.warn("Unable to decrypt attachment: ", err);
-        }).finally(() => {
+            this.setState({
+                error: err,
+                mcsError: true,
+            })
         });
 
     },
@@ -296,7 +300,7 @@ module.exports = React.createClass({
         const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
 
         if (isEncrypted) {
-            if (this.state.mcsError === true) {
+            if (this.state.mcsError === true || this.state.error !== null) {
                 return (
                     <span className="mx_MFileBody" ref="body">
                     <img src="img/warning.svg" width="16" height="16" />
