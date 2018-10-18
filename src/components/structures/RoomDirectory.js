@@ -459,10 +459,10 @@ module.exports = React.createClass({
                 >
                     <td className="mx_RoomDirectory_roomAvatar">
                         <BaseAvatar width={24} height={24} resizeMethod='crop'
-                                    name={ name } idName={ name }
-                                    url={ ContentRepo.getHttpUriForMxc(
-                                        MatrixClientPeg.get().getHomeserverUrl(),
-                                        rooms[i].avatar_url, 24, 24, "crop") } />
+                            name={ name } idName={ name }
+                            url={ ContentRepo.getHttpUriForMxc(
+                                    MatrixClientPeg.get().getHomeserverUrl(),
+                                    rooms[i].avatar_url, 24, 24, "crop") } />
                     </td>
                     <td className="mx_RoomDirectory_roomDescription">
                         <div className="mx_RoomDirectory_name">{ name }</div>&nbsp;
@@ -539,11 +539,7 @@ module.exports = React.createClass({
                 <Loader />
             </div>;
         } else {
-            console.log(`===> Room Server : ${this.state.roomServer}`);
             const rows = this.getRows();
-
-            console.log("===> rows");
-            console.log(rows);
 
             // we still show the scrollpanel, at least for now, because
             // otherwise we don't fetch more because we don't get a fill
@@ -560,11 +556,11 @@ module.exports = React.createClass({
             }
             const ScrollPanel = sdk.getComponent("structures.ScrollPanel");
             content = <ScrollPanel ref={this.collectScrollPanel}
-                                   className="mx_RoomDirectory_tableWrapper"
-                                   onFillRequest={ this.onFillRequest }
-                                   stickyBottom={false}
-                                   startAtBottom={false}
-                                   onResize={function(){}}
+                className="mx_RoomDirectory_tableWrapper"
+                onFillRequest={ this.onFillRequest }
+                stickyBottom={false}
+                startAtBottom={false}
+                onResize={function(){}}
             >
                 { scrollpanel_content }
             </ScrollPanel>;
