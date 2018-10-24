@@ -594,6 +594,7 @@
     "Invalid file%(extra)s": "Invalid file%(extra)s",
     "Error decrypting image": "Error decrypting image",
     "Error decrypting video": "Error decrypting video",
+    "The file %(file)s was rejected by the security policy": "The file %(file)s was rejected by the security policy",
     "%(senderDisplayName)s changed the avatar for %(roomName)s": "%(senderDisplayName)s changed the avatar for %(roomName)s",
     "%(senderDisplayName)s removed the room avatar.": "%(senderDisplayName)s removed the room avatar.",
     "%(senderDisplayName)s changed the room avatar to <img/>": "%(senderDisplayName)s changed the room avatar to <img/>",
