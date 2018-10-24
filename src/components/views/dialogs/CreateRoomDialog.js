@@ -19,12 +19,25 @@ import PropTypes from 'prop-types';
 import sdk from '../../../index';
 import SdkConfig from '../../../SdkConfig';
 import { _t } from '../../../languageHandler';
+import MatrixClientPeg from '../../../MatrixClientPeg';
 const Modal = require('../../../Modal');
 
 export default React.createClass({
     displayName: 'CreateRoomDialog',
     propTypes: {
         onFinished: PropTypes.func.isRequired,
+    },
+
+    getInitialState: function() {
+        const cli = MatrixClientPeg.get();
+        const baseDomain = cli.getDomain();
+        let domain = baseDomain.split('.')[0];
+        return {
+            visibility: 'private',
+            isPublic: false,
+            federate: false,
+            domain: domain
+        };
     },
 
     componentDidMount: function() {
@@ -34,24 +47,50 @@ export default React.createClass({
     },
 
     onOk: function() {
-        if (this.refs.textinput.value === "") {
-            const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
-            Modal.createTrackedDialog('Room name is needed', '', ErrorDialog, {
-                title: _t("Error"),
-                description: _t("Room name is required"),
-            });
-        } else {
-            this.props.onFinished(true, this.refs.textinput.value, this.refs.checkbox.checked);
-        }
+      if (this.refs.textinput.value === "") {
+          const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
+          Modal.createTrackedDialog('Room name is needed', '', ErrorDialog, {
+              title: _t("Error"),
+              description: _t("Room name is required"),
+          });
+      } else {
+        let opts = {
+          visibility: this.state.visibility,
+          preset: this.state.visibility === 'public' ? 'public_chat' : 'private_chat',
+          noFederate: this.refs.checkbox ? this.refs.checkbox.checked : null
+        };
+        this.props.onFinished(true, this.refs.textinput.value, opts);
+      }
     },
 
     onCancel: function() {
         this.props.onFinished(false);
     },
 
+    _onRoomVisibilityRadioToggle: function(ev) {
+        this.setState({
+            visibility: ev.target.value
+        });
+    },
+
     render: function() {
         const BaseDialog = sdk.getComponent('views.dialogs.BaseDialog');
         const DialogButtons = sdk.getComponent('views.elements.DialogButtons');
+        let federationOption = null;
+
+        if (this.state.visibility === 'public') {
+            federationOption = (
+                <div>
+                    <input type="checkbox" id="checkbox" ref="checkbox" defaultChecked={this.defaultNoFederate} />
+                    <label htmlFor="checkbox">
+                        { _t('Limit access to this room to domain members \"%(domain)s\"', {domain: this.state.domain}) }.
+                        <br />
+                        ({ _t('This setting cannot be changed later!') })
+                    </label>
+                </div>
+            );
+        }
+
         return (
             <BaseDialog className="mx_CreateRoomDialog" onFinished={this.props.onFinished}
                 title={_t('Create Room')}
@@ -66,17 +105,24 @@ export default React.createClass({
                         </div>
                         <br />
 
-                        <details className="mx_CreateRoomDialog_details">
-                            <summary className="mx_CreateRoomDialog_details_summary">{ _t('Advanced options') }</summary>
-                            <div>
-                                <input type="checkbox" id="checkbox" ref="checkbox" defaultChecked={this.defaultNoFederate} />
-                                <label htmlFor="checkbox">
-                                { _t('Block users on other matrix homeservers from joining this room') }
-                                    <br />
-                                    ({ _t('This setting cannot be changed later!') })
-                                </label>
-                            </div>
-                        </details>
+                        <label htmlFor="roomVis"> { _t('Room type') } : </label>
+                        <label>
+                            <input type="radio" name="roomVis" value="private"
+                                   onChange={this._onRoomVisibilityRadioToggle}
+                                   checked={this.state.visibility === "private"} />
+                            { _t('Private') }
+                        </label>
+                        <label>
+                            <input type="radio" name="roomVis" value="public"
+                                   onChange={this._onRoomVisibilityRadioToggle}
+                                   checked={this.state.visibility !== "private"} />
+                            { _t('Public') }
+                        </label>
+                        <br />
+                        <br />
+
+                        { federationOption }
+
                     </div>
                 </form>
                 <DialogButtons primaryButton={_t('Create Room')}
