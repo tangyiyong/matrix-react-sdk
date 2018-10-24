@@ -60,7 +60,7 @@ limitations under the License.
 
 .mx_MemberInfo h3 {
     text-transform: uppercase;
-    color: $h3-color;
+    color: #454545;
     font-weight: 600;
     font-size: 13px;
     margin-top: 16px;
@@ -92,6 +92,7 @@ limitations under the License.
 .mx_MemberInfo_createRoom_label {
     width: initial ! important;
     cursor: pointer;
+    color: #454545 !important;
 }
 
 .mx_MemberInfo label {

@@ -20,6 +20,7 @@ import sdk from '../../../index';
 import SdkConfig from '../../../SdkConfig';
 import { _t } from '../../../languageHandler';
 import MatrixClientPeg from '../../../MatrixClientPeg';
+const Modal = require('../../../Modal');
 
 export default React.createClass({
     displayName: 'CreateRoomDialog',
@@ -46,13 +47,20 @@ export default React.createClass({
     },
 
     onOk: function() {
+      if (this.refs.textinput.value === "") {
+          const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
+          Modal.createTrackedDialog('Room name is needed', '', ErrorDialog, {
+              title: _t("Error"),
+              description: _t("Room name is required"),
+          });
+      } else {
         let opts = {
-            visibility: this.state.visibility,
-            preset: this.state.visibility === 'public' ? 'public_chat' : 'private_chat',
-            noFederate: this.refs.checkbox ? this.refs.checkbox.checked : null
+          visibility: this.state.visibility,
+          preset: this.state.visibility === 'public' ? 'public_chat' : 'private_chat',
+          noFederate: this.refs.checkbox ? this.refs.checkbox.checked : null
         };
-
         this.props.onFinished(true, this.refs.textinput.value, opts);
+      }
     },
 
     onCancel: function() {
@@ -90,7 +98,7 @@ export default React.createClass({
                 <form onSubmit={this.onOk}>
                     <div className="mx_Dialog_content">
                         <div className="mx_CreateRoomDialog_label">
-                            <label htmlFor="textinput"> { _t('Room name (optional)') } </label>
+                            <label htmlFor="textinput"> { _t('Room name (required)') } </label>
                         </div>
                         <div className="mx_CreateRoomDialog_input_container">
                             <input id="textinput" ref="textinput" className="mx_CreateRoomDialog_input" autoFocus={true} />

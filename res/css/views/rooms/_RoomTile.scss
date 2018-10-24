@@ -75,6 +75,9 @@ limitations under the License.
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.mx_RoomTile_transparent .mx_RoomTile_nameContainer .mx_RoomTile_name span {
+    color: #454545;
+}
 
 .mx_RoomTile_invite {
 /*    color: rgba(69, 69, 69, 0.5); */

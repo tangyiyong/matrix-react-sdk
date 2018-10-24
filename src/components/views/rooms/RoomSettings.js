@@ -104,7 +104,7 @@ const BannedUser = React.createClass({
             <li>
                 { unbanButton }
                 <span title={_t("Banned by %(displayName)s", {displayName: this.props.by})}>
-                    <strong>{ this.props.member.name }</strong> { this.props.member.userId }
+                    <strong>{ this.props.member.name }</strong>
                     { this.props.reason ? " " +_t('Reason') + ": " + this.props.reason : "" }
                 </span>
             </li>
@@ -719,14 +719,14 @@ module.exports = React.createClass({
                 if (userLevels[user] > defaultUserLevel) { // privileged
                     privilegedUsers.push(<li className="mx_RoomSettings_userLevel" key={user}>
                         { _t("%(user)s is a %(userRole)s", {
-                            user: user,
+                            user: cli.getUser(user).displayName,
                             userRole: <PowerSelector value={userLevels[user]} disabled={true} />,
                         }) }
                     </li>);
                 } else if (userLevels[user] < defaultUserLevel) { // muted
                     mutedUsers.push(<li className="mx_RoomSettings_userLevel" key={user}>
                         { _t("%(user)s is a %(userRole)s", {
-                            user: user,
+                            user: cli.getUser(user).displayName,
                             userRole: <PowerSelector value={userLevels[user]} disabled={true} />,
                         }) }
                     </li>);
@@ -935,91 +935,10 @@ module.exports = React.createClass({
 
                 { tagsSection }
 
-                <div className="mx_RoomSettings_toggles">
-                    <div className="mx_RoomSettings_settings">
-                        <h3>{ _t('Who can access this room?') }</h3>
-                        { inviteGuestWarning }
-                        <label>
-                            <input type="radio" name="roomVis" value="invite_only"
-                                disabled={!this.mayChangeRoomAccess()}
-                                onChange={this._onRoomAccessRadioToggle}
-                                checked={this.state.join_rule !== "public"} />
-                            { _t('Only people who have been invited') }
-                        </label>
-                        <label>
-                            <input type="radio" name="roomVis" value="public_no_guests"
-                                disabled={!this.mayChangeRoomAccess()}
-                                onChange={this._onRoomAccessRadioToggle}
-                                checked={this.state.join_rule === "public" && this.state.guest_access !== "can_join"} />
-                            { _t('Anyone who knows the room\'s link, apart from guests') }
-                        </label>
-                        <label>
-                            <input type="radio" name="roomVis" value="public_with_guests"
-                                disabled={!this.mayChangeRoomAccess()}
-                                onChange={this._onRoomAccessRadioToggle}
-                                checked={this.state.join_rule === "public" && this.state.guest_access === "can_join"} />
-                            { _t('Anyone who knows the room\'s link, including guests') }
-                        </label>
-                        { addressWarning }
-                        <br />
-                        { this._renderEncryptionSection() }
-                        <label>
-                            <input type="checkbox" disabled={!roomState.mayClientSendStateEvent("m.room.aliases", cli)}
-                                   onChange={this._onToggle.bind(this, "isRoomPublished", true, false)}
-                                   checked={this.state.isRoomPublished} />
-                            { _t("Publish this room to the public in %(domain)s's room directory?", { domain: MatrixClientPeg.get().getDomain() }) }
-                        </label>
-                    </div>
-                    <div className="mx_RoomSettings_settings">
-                        <h3>{ _t('Who can read history?') }</h3>
-                        <label>
-                            <input type="radio" name="historyVis" value="world_readable"
-                                    disabled={!roomState.mayClientSendStateEvent("m.room.history_visibility", cli)}
-                                    checked={historyVisibility === "world_readable"}
-                                    onChange={this._onHistoryRadioToggle} />
-                            { _t("Anyone") }
-                        </label>
-                        <label>
-                            <input type="radio" name="historyVis" value="shared"
-                                    disabled={!roomState.mayClientSendStateEvent("m.room.history_visibility", cli)}
-                                    checked={historyVisibility === "shared"}
-                                    onChange={this._onHistoryRadioToggle} />
-                            { _t('Members only (since the point in time of selecting this option)') }
-                        </label>
-                        <label>
-                            <input type="radio" name="historyVis" value="invited"
-                                    disabled={!roomState.mayClientSendStateEvent("m.room.history_visibility", cli)}
-                                    checked={historyVisibility === "invited"}
-                                    onChange={this._onHistoryRadioToggle} />
-                            { _t('Members only (since they were invited)') }
-                        </label>
-                        <label >
-                            <input type="radio" name="historyVis" value="joined"
-                                    disabled={!roomState.mayClientSendStateEvent("m.room.history_visibility", cli)}
-                                    checked={historyVisibility === "joined"}
-                                    onChange={this._onHistoryRadioToggle} />
-                            { _t('Members only (since they joined)') }
-                        </label>
-                    </div>
-                </div>
-
-
                 <div>
                     <h3>{ _t('Room Colour') }</h3>
                     <ColorSettings ref="color_settings" room={this.props.room} />
                 </div>
-
-                <a id="addresses" />
-
-                <AliasSettings ref="alias_settings"
-                    roomId={this.props.room.roomId}
-                    canSetCanonicalAlias={roomState.mayClientSendStateEvent("m.room.canonical_alias", cli)}
-                    canSetAliases={
-                        true
-                        /* Originally, we arbitrarily restricted creating aliases to room admins: roomState.mayClientSendStateEvent("m.room.aliases", cli) */
-                    }
-                    canonicalAliasEvent={this.props.room.currentState.getStateEvents('m.room.canonical_alias', '')}
-                    aliasEvents={this.props.room.currentState.getStateEvents('m.room.aliases')} />
 
                 { relatedGroupsSection }
 

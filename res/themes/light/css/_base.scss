@@ -17,7 +17,7 @@ $focus-bg-color: #dddddd;
 
 // button UI (white-on-green in light skin)
 $accent-fg-color: #ffffff;
-$accent-color: #4D3F7D;
+$accent-color: #374c72;
 
 $selection-fg-color: $primary-bg-color;
 
@@ -39,8 +39,8 @@ $info-plinth-fg-color: #888;
 $preview-bar-bg-color: #f7f7f7;
 
 // left-panel style muted accent color
-$secondary-accent-color: #665C90;
-$tertiary-accent-color: #665C90;
+$secondary-accent-color: #162d58;
+$tertiary-accent-color: #162d58;
 
 // used by RoomDirectory permissions
 $plinth-bg-color: $secondary-accent-color;
@@ -102,8 +102,8 @@ $rte-group-pill-color: #aaa;
 // ********************
 
 $roomtile-name-color: #fff;
-$roomtile-selected-bg-color: rgb(77, 63, 125);
-$roomtile-focused-bg-color: rgb(77, 63, 125);
+$roomtile-selected-bg-color: rgb(55, 76, 114);
+$roomtile-focused-bg-color: rgb(55, 76, 114);
 
 $roomtile-transparent-focused-color: rgba(0, 0, 0, 0.1);
 
@@ -112,7 +112,7 @@ $roomsublist-label-fg-color: $h3-color;
 $roomsublist-label-bg-color: $tertiary-accent-color;
 $roomsublist-chevron-color: $accent-color;
 
-$panel-divider-color: rgb(77, 63, 125);
+$panel-divider-color: rgb(55, 76, 114);
 
 // ********************
 

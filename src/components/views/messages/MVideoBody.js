@@ -90,13 +90,6 @@ module.exports = React.createClass({
         const content = this.props.mxEvent.getContent();
         if (content.file !== undefined && this.state.decryptedUrl === null) {
             let thumbnailPromise = Promise.resolve(null);
-            if (content.info.thumbnail_file) {
-                thumbnailPromise = decryptFile(
-                    content.info.thumbnail_file,
-                ).then(function(blob) {
-                    return URL.createObjectURL(blob);
-                });
-            }
             let decryptedBlob;
             thumbnailPromise.then((thumbnailUrl) => {
                 return decryptFile(content.file).then(function(blob) {
