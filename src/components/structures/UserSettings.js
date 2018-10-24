@@ -379,7 +379,7 @@ module.exports = React.createClass({
                 <div>
              { _t("For security, logging out will delete any end-to-end " +
                   "encryption keys from this browser. If you want to be able " +
-                  "to decrypt your conversation history from future Riot sessions, " +
+                  "to decrypt your conversation history from future Tchap sessions, " +
                   "please export your room keys for safe-keeping.") }
                 </div>,
             button: _t("Sign out"),
@@ -619,7 +619,7 @@ module.exports = React.createClass({
             <div>
                 <h3>Referral</h3>
                 <div className="mx_UserSettings_section">
-                    { _t("Refer a friend to Riot:") } <a href={href}>{ href }</a>
+                    { _t("Refer a friend to Tchap:") } <a href={href}>{ href }</a>
                 </div>
             </div>
         );
@@ -980,7 +980,7 @@ module.exports = React.createClass({
                     const ErrorDialog = sdk.getComponent('dialogs.ErrorDialog');
                     Modal.createTrackedDialog('No media permissions', '', ErrorDialog, {
                         title: _t('No media permissions'),
-                        description: _t('You may need to manually permit Riot to access your microphone/webcam'),
+                        description: _t('You may need to manually permit Tchap to access your microphone/webcam'),
                     });
                 },
             ]);
@@ -1306,7 +1306,7 @@ module.exports = React.createClass({
                             ? gHVersionLabel('matrix-org/matrix-react-sdk', REACT_SDK_VERSION)
                             : REACT_SDK_VERSION
                         }<br />
-                        { _t('riot-web version:') } { (this.state.vectorVersion !== undefined)
+                        { _t('tchap-web version:') } { (this.state.vectorVersion !== undefined)
                             ? this.state.vectorVersion
                             : 'unknown'
                         }<br />
