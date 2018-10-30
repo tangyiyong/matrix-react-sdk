@@ -142,7 +142,7 @@ export default class BugReportDialog extends React.Component {
                     </p>
                     <p>
                         { _t(
-                            "Riot bugs are tracked on GitHub: <a>create a GitHub issue</a>.",
+                            "Tchap bugs are tracked on GitHub: <a>create a GitHub issue</a>.",
                             {},
                             {
                                 a: (sub) => <a

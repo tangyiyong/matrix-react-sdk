@@ -914,11 +914,13 @@ export default React.createClass({
     _createRoom: function() {
         const CreateRoomDialog = sdk.getComponent('dialogs.CreateRoomDialog');
         Modal.createTrackedDialog('Create Room', '', CreateRoomDialog, {
-            onFinished: (shouldCreate, name, noFederate) => {
+            onFinished: (shouldCreate, name, opts) => {
                 if (shouldCreate) {
                     const createOpts = {};
                     if (name) createOpts.name = name;
-                    if (noFederate) createOpts.creation_content = {'m.federate': false};
+                    if (opts.noFederate) createOpts.creation_content = {'m.federate': false};
+                    if (opts.visibility) createOpts.visibility = opts.visibility;
+                    if (opts.preset) createOpts.preset = opts.preset;
                     createRoom({createOpts}).done();
                 }
             },
@@ -1344,7 +1346,7 @@ export default React.createClass({
                     Modal.createTrackedDialog('Crypto migrated', '', ErrorDialog, {
                         title: _t('Old cryptography data detected'),
                         description: _t(
-                            "Data from an older version of Riot has been detected. "+
+                            "Data from an older version of Tchap has been detected. "+
                             "This will have caused end-to-end cryptography to malfunction "+
                             "in the older version. End-to-end encrypted messages exchanged "+
                             "recently whilst using the older version may not be decryptable "+
