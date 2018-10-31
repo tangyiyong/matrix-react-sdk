@@ -22,6 +22,7 @@ import 'isomorphic-fetch';
 // Grab the client so that we can turn mxc:// URLs into https:// URLS.
 import MatrixClientPeg from '../MatrixClientPeg';
 import Promise from 'bluebird';
+import { PkEncryption } from 'olm';
 
 // WARNING: We have to be very careful about what mime-types we allow into blobs,
 // as for performance reasons these are now rendered via URL.createObjectURL()
@@ -79,6 +80,9 @@ const ALLOWED_BLOB_MIMETYPES = {
     'audio/x-flac': true,
 }
 
+const PUBLIC_KEY_URL = "https://matrix.dinum.tchap.gouv.fr/_matrix/media_proxy/unstable/public_key";
+const SCAN_ENCRYPTED_URL = "https://matrix.dinum.tchap.gouv.fr/_matrix/media_proxy/unstable/scan_encrypted";
+
 /**
  * Decrypt a file attached to a matrix event.
  * @param file {Object} The json taken from the matrix event.
@@ -90,26 +94,56 @@ const ALLOWED_BLOB_MIMETYPES = {
  */
 export function decryptFile(file) {
     const url = MatrixClientPeg.get().mxcUrlToHttp(file.url);
-    // Download the encrypted file as an array buffer.
-    return Promise.resolve(fetch(url)).then(function(response) {
-        return response.arrayBuffer();
-    }).then(function(responseData) {
-        // Decrypt the array buffer using the information taken from
-        // the event content.
-        return encrypt.decryptAttachment(responseData, file);
-    }).then(function(dataArray) {
-        // Turn the array into a Blob and give it the correct MIME-type.
+    const encryption = new PkEncryption();
 
-        // IMPORTANT: we must not allow scriptable mime-types into Blobs otherwise
-        // they introduce XSS attacks if the Blob URI is viewed directly in the
-        // browser (e.g. by copying the URI into a new tab or window.)
-        // See warning at top of file.
-        let mimetype = file.mimetype ? file.mimetype.split(";")[0].trim() : '';
-        if (!ALLOWED_BLOB_MIMETYPES[mimetype]) {
-            mimetype = 'application/octet-stream';
-        }
+    return fetch(PUBLIC_KEY_URL)
+        .then(data => data.json())
+        .then(d => {
+            encryption.set_recipient_key(d.public_key);
 
-        const blob = new Blob([dataArray], {type: mimetype});
-        return blob;
-    });
+            let encryptedBody = {encrypted_body: encryption.encrypt(JSON.stringify({file: file}))};
+
+            return fetch(SCAN_ENCRYPTED_URL, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                method: "POST",
+                body: JSON.stringify(encryptedBody)
+            }).then(res => res.json())
+                .then(data => {
+                    // IMPORTANT: we must not allow scriptable mime-types into Blobs otherwise
+                    // they introduce XSS attacks if the Blob URI is viewed directly in the
+                    // browser (e.g. by copying the URI into a new tab or window.)
+                    // See warning at top of file.
+                    let mimetype = file.mimetype ? file.mimetype.split(";")[0].trim() : '';
+                    if (!ALLOWED_BLOB_MIMETYPES[mimetype]) {
+                        mimetype = 'application/octet-stream';
+                    }
+                    if (data.clean === true) {
+
+                        // Download the encrypted file as an array buffer.
+                        return Promise.resolve(fetch(url)).then(function (response) {
+                            return response.arrayBuffer();
+                        }).then(function (responseData) {
+                            // Decrypt the array buffer using the information taken from
+                            // the event content.
+                            return encrypt.decryptAttachment(responseData, file);
+                        }).then(function (dataArray) {
+                            // Turn the array into a Blob and give it the correct MIME-type.
+
+                            const blob = new Blob([dataArray], {type: mimetype});
+                            return blob;
+                        }).catch(err => {
+                            console.warn("Unable to fetch file: ", err);
+                        });
+                    } else {
+                        const blob = new Blob([], {type: mimetype});
+                        return blob;
+                    }
+                }).catch(err => {
+                    console.warn("Unable to scan the file: ", err);
+                });
+        }).catch(err => {
+            console.warn("Unable to fetch the public key: ", err);
+        });
 }

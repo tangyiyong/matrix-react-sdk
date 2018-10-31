@@ -36,7 +36,7 @@ module.exports = React.createClass({
                             <h1>Status Community Chat</h1>
                             <div className="mx_StatusLogin_subtitle">
                                 A safer, decentralised communication
-                                platform <a href="https://riot.im">powered by Riot</a>
+                                platform <a href="https://www.tchap.gouv.fr">powered by Tchap</a>
                             </div>
                         </div>
                         { this.props.children }

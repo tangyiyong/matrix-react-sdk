@@ -348,7 +348,7 @@ module.exports = React.createClass({
                 const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
                 Modal.createTrackedDialog('Unable to join network', '', ErrorDialog, {
                     title: _t('Unable to join network'),
-                    description: _t('Riot does not know how to join a room on this network'),
+                    description: _t('Tchap does not know how to join a room on this network'),
                 });
                 return;
             }
@@ -434,6 +434,8 @@ module.exports = React.createClass({
             var name = rooms[i].name || get_display_alias_for_room(rooms[i]) || _t('Unnamed room');
             guestRead = null;
             guestJoin = null;
+            let displayAlias = get_display_alias_for_room(rooms[i]);
+            let alias = displayAlias.split(":")[1].split(".")[0];
 
             if (rooms[i].world_readable) {
                 guestRead = (
@@ -473,6 +475,7 @@ module.exports = React.createClass({
                         <div className="mx_RoomDirectory_topic"
                              onClick={ function(e) { e.stopPropagation() } }
                              dangerouslySetInnerHTML={{ __html: topic }}/>
+                        <div className="mx_RoomDirectory_alias">{ alias }</div>
                     </td>
                     <td className="mx_RoomDirectory_roomMemberCount">
                         { rooms[i].num_joined_members }
