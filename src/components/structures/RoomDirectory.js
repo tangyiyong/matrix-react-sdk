@@ -423,6 +423,9 @@ module.exports = React.createClass({
         } else {
             rooms = this.state.publicRooms;
         }
+        rooms.sort((a, b) => {
+            return b.num_joined_members - a.num_joined_members;
+        });
 
         var rows = [];
         var self = this;
