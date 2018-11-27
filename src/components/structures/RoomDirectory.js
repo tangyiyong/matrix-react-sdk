@@ -52,12 +52,27 @@ module.exports = React.createClass({
     getInitialState: function() {
         return {
             publicRooms: [],
+            allPublicRooms: [],
             loading: true,
             protocolsLoading: true,
             instanceId: null,
             includeAll: false,
             roomServer: null,
             filterString: null,
+            serverList: [
+                'dev-durable.tchap.gouv.fr',
+                'education.tchap.gouv.fr',
+                'culture.tchap.gouv.fr',
+                'dinum.tchap.gouv.fr',
+                'intradef.tchap.gouv.fr',
+                'diplomatie.tchap.gouv.fr',
+                'justice.tchap.gouv.fr',
+                'agriculture.tchap.gouv.fr',
+                'interieur.tchap.gouv.fr',
+                'social.tchap.gouv.fr',
+                'finances.tchap.gouv.fr',
+                'ssi.tchap.gouv.fr',
+                'pm.tchap.gouv.fr']
         }
     },
 
@@ -87,6 +102,20 @@ module.exports = React.createClass({
                 description: _t('The Home Server may be too old to support third party networks'),
             });
         });
+
+        let serverList = this.state.serverList;
+
+        for (let i = 0; i <= serverList.length; i++) {
+            let opts = {};
+            opts.server = serverList[i];
+            MatrixClientPeg.get().publicRooms(opts).then((data) => {
+                this.setState((st) => {
+                    st.allPublicRooms.push(...data.chunk);
+                    st.loading = false;
+                    return st;
+                });
+            });
+        }
 
         // dis.dispatch({
         //     action: 'panel_disable',
@@ -176,6 +205,7 @@ module.exports = React.createClass({
             }
 
             this.setState({ loading: false });
+            if (my_server === "all.tchap.gouv.fr") return;
             console.error("Failed to get publicRooms: %s", JSON.stringify(err));
             var ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
             Modal.createTrackedDialog('Failed to get public room list', '', ErrorDialog, {
@@ -385,9 +415,18 @@ module.exports = React.createClass({
     getRows: function() {
         var BaseAvatar = sdk.getComponent('avatars.BaseAvatar');
 
-        if (!this.state.publicRooms) return [];
+        if (!this.state.publicRooms || !this.state.allPublicRooms) return [];
 
-        var rooms = this.state.publicRooms;
+        var rooms = null;
+        if (this.state.roomServer === "all.tchap.gouv.fr") {
+            rooms = this.state.allPublicRooms;
+        } else {
+            rooms = this.state.publicRooms;
+        }
+        rooms.sort((a, b) => {
+            return b.num_joined_members - a.num_joined_members;
+        });
+
         var rows = [];
         var self = this;
         var guestRead, guestJoin, perms;
@@ -507,6 +546,7 @@ module.exports = React.createClass({
             </div>;
         } else {
             const rows = this.getRows();
+
             // we still show the scrollpanel, at least for now, because
             // otherwise we don't fetch more because we don't get a fill
             // request from the scrollpanel because there isn't one
@@ -516,7 +556,7 @@ module.exports = React.createClass({
             } else {
                 scrollpanel_content = <table ref="directory_table" className="mx_RoomDirectory_table">
                     <tbody>
-                        { this.getRows() }
+                    { rows }
                     </tbody>
                 </table>;
             }
