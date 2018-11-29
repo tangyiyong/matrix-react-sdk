@@ -80,8 +80,8 @@ const ALLOWED_BLOB_MIMETYPES = {
     'audio/x-flac': true,
 }
 
-const PUBLIC_KEY_URL = "https://matrix.dinum.tchap.gouv.fr/_matrix/media_proxy/unstable/public_key";
-const SCAN_ENCRYPTED_URL = "https://matrix.dinum.tchap.gouv.fr/_matrix/media_proxy/unstable/scan_encrypted";
+const PUBLIC_KEY_API_URL = "/_matrix/media_proxy/unstable/public_key";
+const SCAN_ENCRYPTED_API_URL = "/_matrix/media_proxy/unstable/scan_encrypted";
 
 /**
  * Decrypt a file attached to a matrix event.
@@ -93,17 +93,20 @@ const SCAN_ENCRYPTED_URL = "https://matrix.dinum.tchap.gouv.fr/_matrix/media_pro
  * @param file.mimetype {string} The MIME-type of the plaintext file.
  */
 export function decryptFile(file) {
+    console.error(file);
+    const publicKeyUrl = MatrixClientPeg.get()['baseUrl'] + PUBLIC_KEY_API_URL;
+    const scanEncryptedUrl = MatrixClientPeg.get()['baseUrl'] + SCAN_ENCRYPTED_API_URL;
     const url = MatrixClientPeg.get().mxcUrlToHttp(file.url);
     const encryption = new PkEncryption();
 
-    return fetch(PUBLIC_KEY_URL)
+    return fetch(publicKeyUrl)
         .then(data => data.json())
         .then(d => {
             encryption.set_recipient_key(d.public_key);
 
             let encryptedBody = {encrypted_body: encryption.encrypt(JSON.stringify({file: file}))};
 
-            return fetch(SCAN_ENCRYPTED_URL, {
+            return fetch(scanEncryptedUrl, {
                 headers: {
                     'Content-Type': 'application/json'
                 },

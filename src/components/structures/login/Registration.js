@@ -33,7 +33,6 @@ import SettingsStore from "../../../settings/SettingsStore";
 const MIN_PASSWORD_LENGTH = 6;
 const TCHAP_API_URL = '/_matrix/identity/api/v1/info?medium=email&address=';
 const TCHAP_HOSTS_BASE = 'https://matrix.';
-const TCHAP_HOSTS = ['dev-durable.tchap.gouv.fr', 'education.tchap.gouv.fr', 'culture.tchap.gouv.fr'];
 
 module.exports = React.createClass({
     displayName: 'Registration',
@@ -311,7 +310,8 @@ module.exports = React.createClass({
     },
 
     discoverTchapPlatform: async function(username) {
-        const selectedUrl = TCHAP_HOSTS[(Math.floor(Math.random() * (TCHAP_HOSTS.length)) + 1) - 1];
+        let tchapHostsList  = SdkConfig.get()['hs_main_list'];
+        const selectedUrl = tchapHostsList[(Math.floor(Math.random() * (tchapHostsList.length)) + 1) - 1];
         const res = await fetch(TCHAP_HOSTS_BASE + selectedUrl + TCHAP_API_URL + username).catch(err => console.error(err));
         const data = await res.json();
         this.setState({

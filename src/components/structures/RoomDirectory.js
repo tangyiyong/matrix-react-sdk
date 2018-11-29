@@ -33,6 +33,7 @@ import Promise from 'bluebird';
 import { _t } from '../../languageHandler';
 
 import {instanceForInstanceId, protocolNameForInstanceId} from '../../utils/DirectoryUtils';
+import SdkConfig from '../../SdkConfig';
 
 linkifyMatrix(linkify);
 
@@ -59,20 +60,6 @@ module.exports = React.createClass({
             includeAll: false,
             roomServer: null,
             filterString: null,
-            serverList: [
-                'dev-durable.tchap.gouv.fr',
-                'education.tchap.gouv.fr',
-                'culture.tchap.gouv.fr',
-                'dinum.tchap.gouv.fr',
-                'intradef.tchap.gouv.fr',
-                'diplomatie.tchap.gouv.fr',
-                'justice.tchap.gouv.fr',
-                'agriculture.tchap.gouv.fr',
-                'interieur.tchap.gouv.fr',
-                'social.tchap.gouv.fr',
-                'finances.tchap.gouv.fr',
-                'ssi.tchap.gouv.fr',
-                'pm.tchap.gouv.fr']
         }
     },
 
@@ -103,7 +90,8 @@ module.exports = React.createClass({
             });
         });
 
-        let serverList = this.state.serverList;
+        let hsMainList = SdkConfig.get()['hs_main_list'];
+        let serverList = hsMainList.concat(SdkConfig.get()['hs_additional_list']);
 
         for (let i = 0; i <= serverList.length; i++) {
             let opts = {};
@@ -435,8 +423,8 @@ module.exports = React.createClass({
             guestRead = null;
             guestJoin = null;
             let displayAlias = get_display_alias_for_room(rooms[i]);
-            let alias = displayAlias.split(":")[1].split(".")[0];
-
+            let preAlias = (displayAlias && displayAlias !== null && displayAlias !== '' ? displayAlias : rooms[i].room_id);
+            let alias = preAlias.split(":")[1].split(".")[0];
             if (rooms[i].world_readable) {
                 guestRead = (
                     <div className="mx_RoomDirectory_perm">{ _t('World readable') }</div>
