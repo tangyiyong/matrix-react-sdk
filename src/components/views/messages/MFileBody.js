@@ -249,24 +249,25 @@ module.exports = React.createClass({
         mounts[this.id] = this;
         this.tint();
         const content = this.props.mxEvent.getContent();
-        decryptFile(content.file).then((blob) => {
-            if (blob.size === 0) {
+        if (content.file) {
+            decryptFile(content.file).then((blob) => {
+                if (blob.size === 0) {
+                    this.setState({
+                        mcsError: true
+                    });
+                } else {
+                    this.setState({
+                        decryptedBlob: blob
+                    });
+                }
+            }).catch((err) => {
+                console.warn("Unable to decrypt attachment: ", err);
                 this.setState({
-                    mcsError: true
-                });
-            } else {
-                this.setState({
-                    decryptedBlob: blob
-                });
-            }
-        }).catch((err) => {
-            console.warn("Unable to decrypt attachment: ", err);
-            this.setState({
-                error: err,
-                mcsError: true,
-            })
-        });
-
+                    error: err,
+                    mcsError: true,
+                })
+            });
+        }
     },
 
     componentWillUnmount: function() {
