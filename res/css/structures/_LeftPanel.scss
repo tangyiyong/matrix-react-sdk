@@ -128,6 +128,10 @@ limitations under the License.
     }
 }
 
+.mx_LeftPanel_container_collapsed .mx_LeftPanel .tc_marianne {
+    display: none;
+}
+
 .tc_marianne {
     margin-left: 16px;
     margin-right: 16px;
@@ -136,3 +140,4 @@ limitations under the License.
     padding-left: calc((50% - 50px) - 16px);
     border-bottom: 1px solid rgb(55, 76, 114);
 }
+
