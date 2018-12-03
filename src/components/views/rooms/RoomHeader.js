@@ -33,6 +33,7 @@ import AccessibleButton from '../elements/AccessibleButton';
 import ManageIntegsButton from '../elements/ManageIntegsButton';
 import {CancelButton} from './SimpleRoomHeader';
 import SettingsStore from "../../../settings/SettingsStore";
+import DMRoomMap from "../../../utils/DMRoomMap";
 
 linkifyMatrix(linkify);
 
@@ -407,11 +408,17 @@ module.exports = React.createClass({
                 </div>;
         }
 
+        let mainAvatarClass = "mx_RoomHeader_avatar";
+        const dmRoomMap = new DMRoomMap(MatrixClientPeg.get());
+        if (!Boolean(dmRoomMap.getUserIdForRoomId(this.props.room.roomId))) {
+            mainAvatarClass += " mx_RoomHeader_avatar_room"
+        }
+
         return (
             <div className={"mx_RoomHeader " + (this.props.editing ? "mx_RoomHeader_editing" : "")}>
                 <div className="mx_RoomHeader_wrapper">
                     <div className="mx_RoomHeader_leftRow">
-                        <div className="mx_RoomHeader_avatar">
+                        <div className={mainAvatarClass}>
                             { roomAvatar }
                         </div>
                         <div className="mx_RoomHeader_info">
