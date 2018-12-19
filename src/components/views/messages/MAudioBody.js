@@ -18,11 +18,9 @@
 
 import React from 'react';
 import MFileBody from './MFileBody';
-
-import MatrixClientPeg from '../../../MatrixClientPeg';
-import { decryptFile } from '../../../utils/DecryptFile';
-import Promise from 'bluebird';
 import { _t } from '../../../languageHandler';
+import {downloadContent, downloadContentEncrypted, scanContent} from "../../../utils/ContentScanner";
+import Promise from "bluebird";
 
 export default class MAudioBody extends React.Component {
     constructor(props) {
@@ -32,6 +30,8 @@ export default class MAudioBody extends React.Component {
             decryptedUrl: null,
             decryptedBlob: null,
             error: null,
+            isClean: null,
+            contentUrl: null
         };
     }
     onPlayToggle() {
@@ -45,32 +45,48 @@ export default class MAudioBody extends React.Component {
         if (content.file !== undefined) {
             return this.state.decryptedUrl;
         } else {
-            return MatrixClientPeg.get().mxcUrlToHttp(content.url);
+            return this.state.contentUrl;
         }
     }
 
     componentDidMount() {
         const content = this.props.mxEvent.getContent();
         if (content.file !== undefined && this.state.decryptedUrl === null) {
-            let thumbnailPromise = Promise.resolve(null);
-            let decryptedBlob;
-            thumbnailPromise.then(() => {
-                return decryptFile(content.file).then(function(blob) {
-                    decryptedBlob = blob;
-                    return URL.createObjectURL(blob);
-                }).then((contentUrl) => {
+            scanContent(content).then(result => {
+                if (result.clean === true) {
                     this.setState({
-                        decryptedUrl: contentUrl,
-                        decryptedBlob: decryptedBlob,
+                        isClean: true,
                     });
+                }
+            });
+            let decryptedBlob;
+            Promise.resolve(downloadContentEncrypted(content)).then(function(blob) {
+                decryptedBlob = blob;
+                return URL.createObjectURL(blob);
+            }).then((contentUrl) => {
+                this.setState({
+                    decryptedUrl: contentUrl,
+                    decryptedBlob: decryptedBlob,
                 });
-            }).catch((err) => {
+            }).catch(err => {
                 console.warn("Unable to decrypt attachment: ", err);
-                // Set a placeholder image when we can't decrypt the image.
                 this.setState({
                     error: err,
                 });
-            }).done();
+            });
+        } else if (content.url !== undefined) {
+            scanContent(content).then(result => {
+                if (result.clean === true) {
+                    this.setState({
+                        contentUrl: downloadContent(content),
+                        isClean: true,
+                    })
+                } else {
+                    this.setState({
+                        isClean: false,
+                    })
+                }
+            });
         }
     }
 
