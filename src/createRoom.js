@@ -80,9 +80,16 @@ function createRoom(opts) {
     createOpts.initial_state = createOpts.initial_state || [
         {
             content: {
-                guest_access: 'can_join',
+                guest_access: 'forbidden',
             },
             type: 'm.room.guest_access',
+            state_key: '',
+        },
+        {
+            content: {
+                history_visibility: 'world_readable',
+            },
+            type: 'm.room.history_visibility',
             state_key: '',
         },
     ];
