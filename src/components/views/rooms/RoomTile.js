@@ -320,6 +320,12 @@ module.exports = React.createClass({
 
         const RoomAvatar = sdk.getComponent('avatars.RoomAvatar');
 
+        let dmIndicator;
+        let mainAvatarClass = avatarClasses;
+        if (!this._isDirectMessageRoom(this.props.room.roomId)) {
+            mainAvatarClass += " mx_RoomTile_avatar_room";
+        }
+
         return <AccessibleButton tabIndex="0"
                                  className={classes}
                                  onClick={this.onClick}
@@ -327,7 +333,7 @@ module.exports = React.createClass({
                                  onMouseLeave={this.onMouseLeave}
                                  onContextMenu={this.onContextMenu}
         >
-            <div className={avatarClasses}>
+            <div className={mainAvatarClass}>
                 <div className="mx_RoomTile_avatar_container">
                     <RoomAvatar room={this.props.room} width={24} height={24} />
                 </div>
