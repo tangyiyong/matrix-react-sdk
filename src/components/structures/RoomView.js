@@ -573,25 +573,6 @@ module.exports = React.createClass({
         if (!MatrixClientPeg.get().isRoomEncrypted(room.roomId)) {
             return;
         }
-        let userHasUsedEncryption = false;
-        if (localStorage) {
-            userHasUsedEncryption = localStorage.getItem('mx_user_has_used_encryption');
-        }
-        if (!userHasUsedEncryption) {
-            const QuestionDialog = sdk.getComponent("dialogs.QuestionDialog");
-            Modal.createTrackedDialog('E2E Warning', '', QuestionDialog, {
-                title: _t("Warning!"),
-                hasCancelButton: false,
-                description: (
-                    <div>
-                        <p>{ _t("End-to-end encryption is in beta and may not be reliable") }.</p>
-                        <p>{ _t("You should not yet trust it to secure data") }.</p>
-                        <p>{ _t("Devices will not yet be able to decrypt history from before they joined the room") }.</p>
-                        <p>{ _t("Encrypted messages will not be visible on clients that do not yet implement encryption") }.</p>
-                    </div>
-                ),
-            });
-        }
         if (localStorage) {
             localStorage.setItem('mx_user_has_used_encryption', true);
         }
