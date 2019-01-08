@@ -333,7 +333,9 @@ module.exports = React.createClass({
             );
         }
 
-        if (this.props.onSettingsClick) {
+        const dmRoomMap = new DMRoomMap(MatrixClientPeg.get());
+        let isDMRoom = Boolean(dmRoomMap.getUserIdForRoomId(this.props.room.roomId));
+        if (this.props.onSettingsClick && !isDMRoom) {
             settingsButton =
                 <AccessibleButton className="mx_RoomHeader_button" onClick={this.props.onSettingsClick} title={_t("Settings")}>
                     <TintableSvg src="img/icons-settings-room.svg" width="16" height="16" />
@@ -373,7 +375,8 @@ module.exports = React.createClass({
         }
 
         let searchButton;
-        if (this.props.onSearchClick && this.props.inRoom) {
+        let encryptedState = this.props.room.currentState.getStateEvents("m.room.encryption").length > 0;
+        if (this.props.onSearchClick && this.props.inRoom && !encryptedState) {
             searchButton =
                 <AccessibleButton className="mx_RoomHeader_button" onClick={this.props.onSearchClick} title={_t("Search")}>
                     <TintableSvg src="img/icons-search.svg" width="35" height="35" />

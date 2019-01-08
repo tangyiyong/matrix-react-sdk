@@ -322,9 +322,7 @@ module.exports = React.createClass({
 
         let dmIndicator;
         let mainAvatarClass = avatarClasses;
-        if (this._isDirectMessageRoom(this.props.room.roomId)) {
-            dmIndicator = <img src="img/icon_person.svg" className="mx_RoomTile_dm" width="11" height="13" alt="dm" />;
-        } else {
+        if (!this._isDirectMessageRoom(this.props.room.roomId)) {
             mainAvatarClass += " mx_RoomTile_avatar_room";
         }
 
@@ -338,7 +336,6 @@ module.exports = React.createClass({
             <div className={mainAvatarClass}>
                 <div className="mx_RoomTile_avatar_container">
                     <RoomAvatar room={this.props.room} width={24} height={24} />
-                    { dmIndicator }
                 </div>
             </div>
             <div className="mx_RoomTile_nameContainer">
