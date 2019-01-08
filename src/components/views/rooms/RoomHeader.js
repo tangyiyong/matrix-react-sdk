@@ -333,8 +333,8 @@ module.exports = React.createClass({
             );
         }
 
-        const dmRoomMap = new DMRoomMap(MatrixClientPeg.get());
-        let isDMRoom = Boolean(dmRoomMap.getUserIdForRoomId(this.props.room.roomId));
+        const roomMap = new DMRoomMap(MatrixClientPeg.get());
+        let isDMRoom = Boolean(roomMap.getUserIdForRoomId(this.props.room.roomId));
         if (this.props.onSettingsClick && !isDMRoom) {
             settingsButton =
                 <AccessibleButton className="mx_RoomHeader_button" onClick={this.props.onSettingsClick} title={_t("Settings")}>
