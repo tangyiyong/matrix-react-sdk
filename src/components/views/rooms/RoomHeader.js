@@ -375,7 +375,8 @@ module.exports = React.createClass({
         }
 
         let searchButton;
-        if (this.props.onSearchClick && this.props.inRoom) {
+        let encryptedState = this.props.room.currentState.getStateEvents("m.room.encryption").length > 0;
+        if (this.props.onSearchClick && this.props.inRoom && !encryptedState) {
             searchButton =
                 <AccessibleButton className="mx_RoomHeader_button" onClick={this.props.onSearchClick} title={_t("Search")}>
                     <TintableSvg src="img/icons-search.svg" width="35" height="35" />
