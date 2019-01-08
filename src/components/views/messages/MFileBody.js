@@ -244,7 +244,7 @@ module.exports = React.createClass({
         mounts[this.id] = this;
         this.tint();
         const content = this.props.mxEvent.getContent();
-        if (content.url !== undefined) {
+        if (content.url !== undefined && this.state.contentUrl === null) {
             scanContent(content).then(result => {
                 if (result.clean === true) {
                     this.setState({
@@ -399,7 +399,7 @@ module.exports = React.createClass({
                     </div>
                 </span>
             );
-        } else if (!isEncrypted) {
+        } else if (contentUrl !== null) {
             if (isClean) {
                 // If the attachment is not encrypted then we check whether we
                 // are being displayed in the room timeline or in a list of

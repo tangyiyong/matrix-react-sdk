@@ -4,6 +4,12 @@ import {PkEncryption} from "olm";
 import Promise from "bluebird";
 import {decryptFile} from "./DecryptFile";
 
+/**
+ * Generating a generic error.
+ * @param state {boolean} The state of the file (clean or not).
+ * @param message {string} The error message.
+ * @returns {{clean: *, error: *}}
+ */
 function generateError(state, message) {
 	return {
 		clean: state,
@@ -11,6 +17,10 @@ function generateError(state, message) {
 	}
 }
 
+/**
+ * Generate the default settings for the MCS.
+ * @returns {object} An object containing the settings.
+ */
 function generateSettings() {
 	const baseUrl = MatrixClientPeg.get()['baseUrl'];
 	return {
@@ -23,17 +33,25 @@ function generateSettings() {
 	}
 }
 
+/**
+ * Scan a Matrix Event content.
+ * If the content is a file or an encrypted file, a promise containing the scan result is returned.
+ * Thumbnails for image files are not processed because a scan is ran every time a download is called.
+ * @param content A Mtrix Event content.
+ * @returns {Promise<*>}
+ */
 export async function scanContent(content) {
 	const settings = generateSettings();
 
 	if (content.file !== undefined) {
+		// Getting the public key if the server answer
 		let publicKey;
 		try {
 			const publicKeyData = await fetch(settings.publicKeyUrl);
 			const publicKeyObject = await publicKeyData.json();
 			publicKey = publicKeyObject.public_key;
 		} catch (err) {
-			console.warn(`Unable to retrive the publicKey : ${err}`);
+			console.warn(`Unable to retrieve the publicKey : ${err}`);
 		}
 
 		let body;
@@ -76,6 +94,12 @@ export async function scanContent(content) {
 	}
 }
 
+/**
+ * Download an unencrypted content.
+ * @param content A Mtrix Event content.
+ * @param isThumb If the requested data will be a thumbnail.
+ * @returns {*} A string or an error object.
+ */
 export function downloadContent(content, isThumb = false) {
 	const settings = generateSettings();
 
@@ -93,6 +117,12 @@ export function downloadContent(content, isThumb = false) {
 	}
 }
 
+/**
+ * Download an encrypted content.
+ * @param content A Mtrix Event content.
+ * @param isThumb If the requested data will be a thumbnail.
+ * @returns {Promise<*>} A Promise or an error object.
+ */
 export async function downloadContentEncrypted(content, isThumb = false) {
 	if (content.file !== undefined || content.info.thumbnail_file !== undefined) {
 		let file = isThumb ? content.info.thumbnail_file : content.file;

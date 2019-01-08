@@ -74,7 +74,7 @@ export default class MAudioBody extends React.Component {
                     error: err,
                 });
             });
-        } else if (content.url !== undefined) {
+        } else if (content.url !== undefined && this.state.contentUrl === null) {
             scanContent(content).then(result => {
                 if (result.clean === true) {
                     this.setState({
