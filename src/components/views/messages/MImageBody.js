@@ -23,10 +23,10 @@ import { MatrixClient } from 'matrix-js-sdk';
 import MFileBody from './MFileBody';
 import Modal from '../../../Modal';
 import sdk from '../../../index';
-import { decryptFile } from '../../../utils/DecryptFile';
 import Promise from 'bluebird';
 import { _t } from '../../../languageHandler';
 import SettingsStore from "../../../settings/SettingsStore";
+import {scanContent, downloadContent, downloadContentEncrypted} from "../../../utils/ContentScanner";
 
 export default class MImageBody extends React.Component {
     static propTypes = {
@@ -64,6 +64,8 @@ export default class MImageBody extends React.Component {
             imgLoaded: false,
             loadedImageDimensions: null,
             hover: false,
+            contentUrl: null,
+            isClean: null
         };
     }
 
@@ -111,9 +113,9 @@ export default class MImageBody extends React.Component {
     _isGif() {
         const content = this.props.mxEvent.getContent();
         return (
-          content &&
-          content.info &&
-          content.info.mimetype === "image/gif"
+            content &&
+            content.info &&
+            content.info.mimetype === "image/gif"
         );
     }
 
@@ -162,7 +164,7 @@ export default class MImageBody extends React.Component {
         if (content.file !== undefined) {
             return this.state.decryptedUrl;
         } else {
-            return this.context.matrixClient.mxcUrlToHttp(content.url);
+            return this.state.contentUrl;
         }
     }
 
@@ -178,37 +180,67 @@ export default class MImageBody extends React.Component {
             // special case to return client-generated thumbnails for SVGs, if any,
             // given we deliberately don't thumbnail them serverside to prevent
             // billion lol attacks and similar
-            return this.context.matrixClient.mxcUrlToHttp(
-                content.info.thumbnail_url, 800, 600,
-            );
+            return downloadContent(content, true);
         } else {
-            return this.context.matrixClient.mxcUrlToHttp(content.url, 800, 600);
+            //return this.context.matrixClient.mxcUrlToHttp(content.url, 800, 600);
+            return downloadContent(content, true);
         }
     }
 
     componentDidMount() {
         const content = this.props.mxEvent.getContent();
         if (content.file !== undefined && this.state.decryptedUrl === null) {
-            let thumbnailPromise = Promise.resolve(null);
-            let decryptedBlob;
-            thumbnailPromise.then((thumbnailUrl) => {
-                return decryptFile(content.file).then(function(blob) {
-                    decryptedBlob = blob;
-                    return URL.createObjectURL(blob);
-                }).then((contentUrl) => {
+            scanContent(content).then(result => {
+                if (result.clean === true) {
                     this.setState({
-                        decryptedUrl: contentUrl,
-                        decryptedThumbnailUrl: thumbnailUrl,
-                        decryptedBlob: decryptedBlob,
+                        isClean: true,
                     });
-                });
-            }).catch((err) => {
-                console.warn("Unable to decrypt attachment: ", err);
-                // Set a placeholder image when we can't decrypt the image.
-                this.setState({
-                    error: err,
-                });
-            }).done();
+                    let thumbnailPromise = Promise.resolve(null);
+                    if (content.info && content.info.thumbnail_file) {
+                        thumbnailPromise = downloadContentEncrypted(
+                            content, true
+                        ).then(function(blob) {
+                            return URL.createObjectURL(blob);
+                        });
+                    }
+                    let decryptedBlob;
+                    thumbnailPromise.then((thumbnailUrl) => {
+                        return Promise.resolve(downloadContentEncrypted(content)).then(function(blob) {
+                            decryptedBlob = blob;
+                            return URL.createObjectURL(blob);
+                        }).then((contentUrl) => {
+                            this.setState({
+                                decryptedUrl: contentUrl,
+                                decryptedThumbnailUrl: thumbnailUrl,
+                                decryptedBlob: decryptedBlob,
+                            });
+                        });
+                    }).catch((err) => {
+                        console.warn("Unable to decrypt attachment: ", err);
+                        // Set a placeholder image when we can't decrypt the image.
+                        this.setState({
+                            error: err,
+                        });
+                    }).done();
+                } else {
+                    this.setState({
+                        isClean: false,
+                    });
+                }
+            });
+        } else if (content.url !== undefined && this.state.contentUrl === null) {
+            scanContent(content).then(result => {
+                if (result.clean === true) {
+                    this.setState({
+                        contentUrl: downloadContent(content),
+                        isClean: true,
+                    })
+                } else {
+                    this.setState({
+                        isClean: false,
+                    })
+                }
+            });
         }
         this._afterComponentDidMount();
     }
@@ -360,9 +392,9 @@ export default class MImageBody extends React.Component {
         const contentUrl = this._getContentUrl();
         let thumbUrl;
         if (this._isGif() && SettingsStore.getValue("autoplayGifsAndVideos")) {
-          thumbUrl = contentUrl;
+            thumbUrl = contentUrl;
         } else {
-          thumbUrl = this._getThumbUrl();
+            thumbUrl = this._getThumbUrl();
         }
 
         const thumbnail = this._messageContent(contentUrl, thumbUrl, content);
