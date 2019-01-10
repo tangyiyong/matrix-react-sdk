@@ -333,8 +333,12 @@ module.exports = React.createClass({
             );
         }
 
-        const roomMap = new DMRoomMap(MatrixClientPeg.get());
-        let isDMRoom = Boolean(roomMap.getUserIdForRoomId(this.props.room.roomId));
+        let isDMRoom = true;
+        if (this.props.room) {
+            const roomMap = new DMRoomMap(MatrixClientPeg.get());
+            isDMRoom = Boolean(roomMap.getUserIdForRoomId(this.props.room.roomId));
+        }
+
         if (this.props.onSettingsClick && !isDMRoom) {
             settingsButton =
                 <AccessibleButton className="mx_RoomHeader_button" onClick={this.props.onSettingsClick} title={_t("Settings")}>
@@ -375,7 +379,10 @@ module.exports = React.createClass({
         }
 
         let searchButton;
-        let encryptedState = this.props.room.currentState.getStateEvents("m.room.encryption").length > 0;
+        let encryptedState = true;
+        if (this.props.room) {
+            encryptedState = this.props.room.currentState.getStateEvents("m.room.encryption").length > 0;
+        }
         if (this.props.onSearchClick && this.props.inRoom && !encryptedState) {
             searchButton =
                 <AccessibleButton className="mx_RoomHeader_button" onClick={this.props.onSearchClick} title={_t("Search")}>
@@ -412,8 +419,7 @@ module.exports = React.createClass({
         }
 
         let mainAvatarClass = "mx_RoomHeader_avatar";
-        const dmRoomMap = new DMRoomMap(MatrixClientPeg.get());
-        if (!Boolean(dmRoomMap.getUserIdForRoomId(this.props.room.roomId))) {
+        if (!isDMRoom) {
             mainAvatarClass += " mx_RoomHeader_avatar_room"
         }
 
