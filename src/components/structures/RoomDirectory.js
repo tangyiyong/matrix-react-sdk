@@ -91,18 +91,20 @@ module.exports = React.createClass({
         });
 
         let hsMainList = SdkConfig.get()['hs_main_list'];
-        let serverList = hsMainList.concat(SdkConfig.get()['hs_additional_list']);
+        if (hsMainList) {
+            let serverList = hsMainList.concat(SdkConfig.get()['hs_additional_list']);
 
-        for (let i = 0; i <= serverList.length; i++) {
-            let opts = {};
-            opts.server = serverList[i];
-            MatrixClientPeg.get().publicRooms(opts).then((data) => {
-                this.setState((st) => {
-                    st.allPublicRooms.push(...data.chunk);
-                    st.loading = false;
-                    return st;
+            for (let i = 0; i <= serverList.length; i++) {
+                let opts = {};
+                opts.server = serverList[i];
+                MatrixClientPeg.get().publicRooms(opts).then((data) => {
+                    this.setState((st) => {
+                        st.allPublicRooms.push(...data.chunk);
+                        st.loading = false;
+                        return st;
+                    });
                 });
-            });
+            }
         }
 
         // dis.dispatch({

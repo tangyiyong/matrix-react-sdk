@@ -70,8 +70,8 @@ module.exports = React.createClass({
             busy: false,
             errorText: null,
             loginIncorrect: false,
-            enteredHomeserverUrl: randomHs || this.props.customHsUrl || this.props.defaultHsUrl,
-            enteredIdentityServerUrl: randomHs || this.props.customIsUrl || this.props.defaultIsUrl,
+            enteredHomeserverUrl: randomHs,
+            enteredIdentityServerUrl: randomHs,
 
             // used for preserving form values when changing homeserver
             username: "",
@@ -149,7 +149,7 @@ module.exports = React.createClass({
                                 <div className="mx_Login_smallError">
                                     { _t('Please note you are logging into the %(hs)s server, not matrix.org.',
                                         {
-                                            hs: this.props.defaultHsUrl.replace(/^https?:\/\//, ''),
+                                            hs: this.state.enteredHomeserverUrl.replace(/^https?:\/\//, ''),
                                         })
                                     }
                                 </div>
