@@ -419,29 +419,11 @@ module.exports = React.createClass({
 
         var rows = [];
         var self = this;
-        var guestRead, guestJoin, perms;
         for (var i = 0; i < rooms.length; i++) {
             var name = rooms[i].name || get_display_alias_for_room(rooms[i]) || _t('Unnamed room');
-            guestRead = null;
-            guestJoin = null;
             let displayAlias = get_display_alias_for_room(rooms[i]);
             let preAlias = (displayAlias && displayAlias !== null && displayAlias !== '' ? displayAlias : rooms[i].room_id);
             let alias = preAlias.split(":")[1].split(".")[0];
-            if (rooms[i].world_readable) {
-                guestRead = (
-                    <div className="mx_RoomDirectory_perm">{ _t('World readable') }</div>
-                );
-            }
-            if (rooms[i].guest_can_join) {
-                guestJoin = (
-                    <div className="mx_RoomDirectory_perm">{ _t('Guests can join') }</div>
-                );
-            }
-
-            perms = null;
-            if (guestRead || guestJoin) {
-                perms = <div className="mx_RoomDirectory_perms">{guestRead}{guestJoin}</div>;
-            }
 
             var topic = rooms[i].topic || '';
             topic = linkifyString(sanitizeHtml(topic));
@@ -461,7 +443,6 @@ module.exports = React.createClass({
                     </td>
                     <td className="mx_RoomDirectory_roomDescription">
                         <div className="mx_RoomDirectory_name">{ name }</div>&nbsp;
-                        { perms }
                         <div className="mx_RoomDirectory_topic"
                              onClick={ function(e) { e.stopPropagation() } }
                              dangerouslySetInnerHTML={{ __html: topic }}/>

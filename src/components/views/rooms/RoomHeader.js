@@ -33,6 +33,7 @@ import AccessibleButton from '../elements/AccessibleButton';
 import ManageIntegsButton from '../elements/ManageIntegsButton';
 import {CancelButton} from './SimpleRoomHeader';
 import SettingsStore from "../../../settings/SettingsStore";
+import DMRoomMap from "../../../utils/DMRoomMap";
 
 linkifyMatrix(linkify);
 
@@ -332,7 +333,9 @@ module.exports = React.createClass({
             );
         }
 
-        if (this.props.onSettingsClick) {
+        const roomMap = new DMRoomMap(MatrixClientPeg.get());
+        let isDMRoom = Boolean(roomMap.getUserIdForRoomId(this.props.room.roomId));
+        if (this.props.onSettingsClick && !isDMRoom) {
             settingsButton =
                 <AccessibleButton className="mx_RoomHeader_button" onClick={this.props.onSettingsClick} title={_t("Settings")}>
                     <TintableSvg src="img/icons-settings-room.svg" width="16" height="16" />
@@ -372,7 +375,8 @@ module.exports = React.createClass({
         }
 
         let searchButton;
-        if (this.props.onSearchClick && this.props.inRoom) {
+        let encryptedState = this.props.room.currentState.getStateEvents("m.room.encryption").length > 0;
+        if (this.props.onSearchClick && this.props.inRoom && !encryptedState) {
             searchButton =
                 <AccessibleButton className="mx_RoomHeader_button" onClick={this.props.onSearchClick} title={_t("Search")}>
                     <TintableSvg src="img/icons-search.svg" width="35" height="35" />
@@ -407,11 +411,17 @@ module.exports = React.createClass({
                 </div>;
         }
 
+        let mainAvatarClass = "mx_RoomHeader_avatar";
+        const dmRoomMap = new DMRoomMap(MatrixClientPeg.get());
+        if (!Boolean(dmRoomMap.getUserIdForRoomId(this.props.room.roomId))) {
+            mainAvatarClass += " mx_RoomHeader_avatar_room"
+        }
+
         return (
             <div className={"mx_RoomHeader " + (this.props.editing ? "mx_RoomHeader_editing" : "")}>
                 <div className="mx_RoomHeader_wrapper">
                     <div className="mx_RoomHeader_leftRow">
-                        <div className="mx_RoomHeader_avatar">
+                        <div className={mainAvatarClass}>
                             { roomAvatar }
                         </div>
                         <div className="mx_RoomHeader_info">

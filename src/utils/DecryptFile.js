@@ -1,20 +1,16 @@
 /*
 Copyright 2016 OpenMarket Ltd
 Copyright 2018 New Vector Ltd
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 // Pull in the encryption lib so that we can decrypt attachments.
 import encrypt from 'browser-encrypt-attachment';
 // Pull in a fetch polyfill so we can download encrypted attachments.
@@ -22,8 +18,9 @@ import 'isomorphic-fetch';
 // Grab the client so that we can turn mxc:// URLs into https:// URLS.
 import MatrixClientPeg from '../MatrixClientPeg';
 import Promise from 'bluebird';
-import { PkEncryption } from 'olm';
-
+import {
+    PkEncryption
+} from 'olm';
 // WARNING: We have to be very careful about what mime-types we allow into blobs,
 // as for performance reasons these are now rendered via URL.createObjectURL()
 // rather than by converting into data: URIs.
@@ -57,16 +54,13 @@ import { PkEncryption } from 'olm';
 //
 // For the record, mime-types which must NEVER enter this list below include:
 //   text/html, text/xhtml, image/svg, image/svg+xml, image/pdf, and similar.
-
 const ALLOWED_BLOB_MIMETYPES = {
     'image/jpeg': true,
     'image/gif': true,
     'image/png': true,
-
     'video/mp4': true,
     'video/webm': true,
     'video/ogg': true,
-
     'audio/mp4': true,
     'audio/webm': true,
     'audio/aac': true,
@@ -79,10 +73,8 @@ const ALLOWED_BLOB_MIMETYPES = {
     'audio/flac': true,
     'audio/x-flac': true,
 }
-
 const PUBLIC_KEY_API_URL = "/_matrix/media_proxy/unstable/public_key";
 const SCAN_ENCRYPTED_API_URL = "/_matrix/media_proxy/unstable/scan_encrypted";
-
 /**
  * Decrypt a file attached to a matrix event.
  * @param file {Object} The json taken from the matrix event.
@@ -98,21 +90,22 @@ export function decryptFile(file) {
     const scanEncryptedUrl = MatrixClientPeg.get()['baseUrl'] + SCAN_ENCRYPTED_API_URL;
     const url = MatrixClientPeg.get().mxcUrlToHttp(file.url);
     const encryption = new PkEncryption();
-
     return fetch(publicKeyUrl)
         .then(data => data.json())
         .then(d => {
             encryption.set_recipient_key(d.public_key);
-
-            let encryptedBody = {encrypted_body: encryption.encrypt(JSON.stringify({file: file}))};
-
+            let encryptedBody = {
+                encrypted_body: encryption.encrypt(JSON.stringify({
+                    file: file
+                }))
+            };
             return fetch(scanEncryptedUrl, {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                method: "POST",
-                body: JSON.stringify(encryptedBody)
-            }).then(res => res.json())
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    method: "POST",
+                    body: JSON.stringify(encryptedBody)
+                }).then(res => res.json())
                 .then(data => {
                     // IMPORTANT: we must not allow scriptable mime-types into Blobs otherwise
                     // they introduce XSS attacks if the Blob URI is viewed directly in the
@@ -123,24 +116,26 @@ export function decryptFile(file) {
                         mimetype = 'application/octet-stream';
                     }
                     if (data.clean === true) {
-
                         // Download the encrypted file as an array buffer.
-                        return Promise.resolve(fetch(url)).then(function (response) {
+                        return Promise.resolve(fetch(url)).then(function(response) {
                             return response.arrayBuffer();
-                        }).then(function (responseData) {
+                        }).then(function(responseData) {
                             // Decrypt the array buffer using the information taken from
                             // the event content.
                             return encrypt.decryptAttachment(responseData, file);
-                        }).then(function (dataArray) {
+                        }).then(function(dataArray) {
                             // Turn the array into a Blob and give it the correct MIME-type.
-
-                            const blob = new Blob([dataArray], {type: mimetype});
+                            const blob = new Blob([dataArray], {
+                                type: mimetype
+                            });
                             return blob;
                         }).catch(err => {
                             console.warn("Unable to fetch file: ", err);
                         });
                     } else {
-                        const blob = new Blob([], {type: mimetype});
+                        const blob = new Blob([], {
+                            type: mimetype
+                        });
                         return blob;
                     }
                 }).catch(err => {

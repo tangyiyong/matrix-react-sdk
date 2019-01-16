@@ -20,13 +20,12 @@ limitations under the License.
 import React from 'react';
 import PropTypes from 'prop-types';
 import filesize from 'filesize';
-import MatrixClientPeg from '../../../MatrixClientPeg';
 import sdk from '../../../index';
 import { _t } from '../../../languageHandler';
-import {decryptFile} from '../../../utils/DecryptFile';
 import Tinter from '../../../Tinter';
 import request from 'browser-request';
 import Modal from '../../../Modal';
+import {scanContent, downloadContent, downloadContentEncrypted} from "../../../utils/ContentScanner";
 
 
 // A cached tinted copy of "img/download.svg"
@@ -200,8 +199,9 @@ module.exports = React.createClass({
     getInitialState: function() {
         return {
             decryptedBlob: (this.props.decryptedBlob ? this.props.decryptedBlob : null),
-            mcsError: false,
-            error: null
+            contentUrl: null,
+            isClean: null,
+            isEncrypted: false
         };
     },
 
@@ -237,11 +237,6 @@ module.exports = React.createClass({
         return linkText;
     },
 
-    _getContentUrl: function() {
-        const content = this.props.mxEvent.getContent();
-        return MatrixClientPeg.get().mxcUrlToHttp(content.url);
-    },
-
     componentDidMount: function() {
         // Add this to the list of mounted components to receive notifications
         // when the tint changes.
@@ -249,24 +244,36 @@ module.exports = React.createClass({
         mounts[this.id] = this;
         this.tint();
         const content = this.props.mxEvent.getContent();
-        decryptFile(content.file).then((blob) => {
-            if (blob.size === 0) {
-                this.setState({
-                    mcsError: true
-                });
-            } else {
-                this.setState({
-                    decryptedBlob: blob
-                });
-            }
-        }).catch((err) => {
-            console.warn("Unable to decrypt attachment: ", err);
-            this.setState({
-                error: err,
-                mcsError: true,
-            })
-        });
-
+        if (content.url !== undefined && this.state.contentUrl === null) {
+            scanContent(content).then(result => {
+                if (result.clean === true) {
+                    this.setState({
+                        contentUrl: downloadContent(content),
+                        isClean: true,
+                        isEncrypted: false,
+                    })
+                } else {
+                    this.setState({
+                        isClean: false,
+                        isEncrypted: false,
+                    })
+                }
+            });
+        } else if (content.file !== undefined) {
+            scanContent(content).then(result => {
+                if (result.clean === true) {
+                    this.setState({
+                        isClean: true,
+                        isEncrypted: true,
+                    })
+                } else {
+                    this.setState({
+                        isClean: false,
+                        isEncrypted: true,
+                    })
+                }
+            });
+        }
     },
 
     componentWillUnmount: function() {
@@ -294,20 +301,14 @@ module.exports = React.createClass({
     render: function() {
         const content = this.props.mxEvent.getContent();
         const text = this.presentableTextForFile(content);
-        const isEncrypted = content.file !== undefined;
+        const isEncrypted = this.state.isEncrypted;
         const fileName = content.body && content.body.length > 0 ? content.body : _t("Attachment");
-        const contentUrl = this._getContentUrl();
+        const contentUrl = this.state.contentUrl;
+        const isClean = this.state.isClean;
         const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
 
         if (isEncrypted) {
-            if (this.state.mcsError === true || this.state.error !== null) {
-                return (
-                    <span className="mx_MFileBody" ref="body">
-                    <img src="img/warning.svg" width="16" height="16" />
-                        { _t("The file %(file)s was rejected by the security policy", {file: content.body}) }
-                </span>
-                );
-            } else if (this.state.decryptedBlob === null) {
+            if (this.state.decryptedBlob === null) {
                 // Need to decrypt the attachment
                 // Wait for the user to click on the link before downloading
                 // and decrypting the attachment.
@@ -317,10 +318,18 @@ module.exports = React.createClass({
                         return false;
                     }
                     decrypting = true;
-                    decryptFile(content.file).then((blob) => {
-                        this.setState({
-                            decryptedBlob: blob,
-                        });
+                    Promise.resolve(downloadContentEncrypted(content )).then((blob) => {
+                        if (blob.size > 0) {
+                            this.setState({
+                                decryptedBlob: blob,
+                                isClean: true
+                            });
+                        } else {
+                            this.setState({
+                                decryptedBlob: null,
+                                isClean: false
+                            });
+                        }
                     }).catch((err) => {
                         console.warn("Unable to decrypt attachment: ", err);
                         Modal.createTrackedDialog('Error decrypting attachment', '', ErrorDialog, {
@@ -329,21 +338,29 @@ module.exports = React.createClass({
                         });
                     }).finally(() => {
                         decrypting = false;
-                        return;
                     });
                 };
 
-                return (
-                    <span className="mx_MFileBody" ref="body">
+                if (isClean) {
+                    return (
+                        <span className="mx_MFileBody" ref="body">
                         <div className="mx_MFileBody_download">
                             <a href="javascript:void(0)" onClick={decrypt}>
                                 { _t("Decrypt %(text)s", { text: text }) }
                             </a>
                         </div>
                     </span>
-                );
-            }
+                    );
+                } else {
+                    return (
+                        <span className="mx_MFileBody" ref="body">
+                        <img src="img/warning.svg" width="16" height="16" />
+                        { _t("The file %(file)s was rejected by the security policy", {file: content.body}) }
+                    </span>
+                    );
+                }
 
+            }
             // When the iframe loads we tell it to render a download link
             const onIframeLoad = (ev) => {
                 ev.target.contentWindow.postMessage({
@@ -382,13 +399,14 @@ module.exports = React.createClass({
                     </div>
                 </span>
             );
-        } else if (contentUrl) {
-            // If the attachment is not encrypted then we check whether we
-            // are being displayed in the room timeline or in a list of
-            // files in the right hand side of the screen.
-            if (this.props.tileShape === "file_grid") {
-                return (
-                    <span className="mx_MFileBody">
+        } else if (contentUrl !== null) {
+            if (isClean) {
+                // If the attachment is not encrypted then we check whether we
+                // are being displayed in the room timeline or in a list of
+                // files in the right hand side of the screen.
+                if (this.props.tileShape === "file_grid") {
+                    return (
+                        <span className="mx_MFileBody">
                         <div className="mx_MFileBody_download">
                             <a className="mx_MFileBody_downloadLink" href={contentUrl} download={fileName} target="_blank">
                                 { fileName }
@@ -398,10 +416,10 @@ module.exports = React.createClass({
                             </div>
                         </div>
                     </span>
-                );
-            } else {
-                return (
-                    <span className="mx_MFileBody">
+                    );
+                } else {
+                    return (
+                        <span className="mx_MFileBody">
                         <div className="mx_MFileBody_download">
                             <a href={contentUrl} download={fileName} target="_blank" rel="noopener">
                                 <img src={tintedDownloadImageURL} width="12" height="14" ref="downloadImage" />
@@ -409,6 +427,14 @@ module.exports = React.createClass({
                             </a>
                         </div>
                     </span>
+                    );
+                }
+            } else {
+                return (
+                    <span className="mx_MFileBody" ref="body">
+                    <img src="img/warning.svg" width="16" height="16" />
+                        { _t("The file %(file)s was rejected by the security policy", {file: content.body}) }
+                </span>
                 );
             }
         } else {

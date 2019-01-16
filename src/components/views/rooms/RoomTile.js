@@ -321,8 +321,9 @@ module.exports = React.createClass({
         const RoomAvatar = sdk.getComponent('avatars.RoomAvatar');
 
         let dmIndicator;
-        if (this._isDirectMessageRoom(this.props.room.roomId)) {
-            dmIndicator = <img src="img/icon_person.svg" className="mx_RoomTile_dm" width="11" height="13" alt="dm" />;
+        let mainAvatarClass = avatarClasses;
+        if (!this._isDirectMessageRoom(this.props.room.roomId)) {
+            mainAvatarClass += " mx_RoomTile_avatar_room";
         }
 
         return <AccessibleButton tabIndex="0"
@@ -332,10 +333,9 @@ module.exports = React.createClass({
                                  onMouseLeave={this.onMouseLeave}
                                  onContextMenu={this.onContextMenu}
         >
-            <div className={avatarClasses}>
+            <div className={mainAvatarClass}>
                 <div className="mx_RoomTile_avatar_container">
                     <RoomAvatar room={this.props.room} width={24} height={24} />
-                    { dmIndicator }
                 </div>
             </div>
             <div className="mx_RoomTile_nameContainer">
