@@ -17,23 +17,9 @@ limitations under the License.
 import React from 'react';
 import MatrixClientPeg from '../../../MatrixClientPeg';
 import {instanceForInstanceId} from '../../../utils/DirectoryUtils';
+import SdkConfig from '../../../SdkConfig';
 
 const DEFAULT_ICON_URL = "img/network-matrix.svg";
-const SERVER_LIST = [
-    'dev-durable.tchap.gouv.fr',
-    'education.tchap.gouv.fr',
-    'culture.tchap.gouv.fr',
-    'dinum.tchap.gouv.fr',
-    'intradef.tchap.gouv.fr',
-    'diplomatie.tchap.gouv.fr',
-    'justice.tchap.gouv.fr',
-    'agriculture.tchap.gouv.fr',
-    'interieur.tchap.gouv.fr',
-    'social.tchap.gouv.fr',
-    'finances.tchap.gouv.fr',
-    'ssi.tchap.gouv.fr',
-    'pm.tchap.gouv.fr',
-    'all.tchap.gouv.fr'];
 
 export default class NetworkDropdown extends React.Component {
     constructor(props) {
@@ -154,7 +140,11 @@ export default class NetworkDropdown extends React.Component {
             servers.unshift(MatrixClientPeg.getHomeServerName());
         }
 
-        SERVER_LIST.forEach(s => {
+        let hsMainList = SdkConfig.get()['hs_main_list'];
+        let svrList = hsMainList.concat(SdkConfig.get()['hs_additional_list']);
+        svrList.push('all.tchap.gouv.fr');
+
+        svrList.forEach(s => {
             if (!servers.includes(s)) {
                 servers.unshift(s);
             }
