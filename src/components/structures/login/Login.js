@@ -64,7 +64,11 @@ module.exports = React.createClass({
 
     getInitialState: function() {
         let tchapHostsList  = SdkConfig.get()['hs_main_list'];
-        const randomHs = TCHAP_HOSTS_BASE + tchapHostsList[(Math.floor(Math.random() * (tchapHostsList.length)) + 1) - 1];
+        let randomHs = null;
+        if (tchapHostsList) {
+            randomHs = TCHAP_HOSTS_BASE + tchapHostsList[(Math.floor(Math.random() * (tchapHostsList.length)) + 1) - 1];
+        }
+
         return {
             busy: false,
             errorText: null,
