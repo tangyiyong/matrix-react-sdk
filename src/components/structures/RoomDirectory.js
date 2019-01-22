@@ -422,7 +422,7 @@ module.exports = React.createClass({
         for (var i = 0; i < rooms.length; i++) {
             var name = rooms[i].name || get_display_alias_for_room(rooms[i]) || _t('Unnamed room');
             let displayAlias = get_display_alias_for_room(rooms[i]) || rooms[i].room_id;
-            let alias = displayAlias.split('.tchap.gouv.fr')[0].split('.').filter(Boolean).reverse()[0];
+            let alias = displayAlias.split(':').reverse()[0].split('.tchap.gouv.fr')[0].split('.').filter(Boolean).reverse()[0];
 
             var topic = rooms[i].topic || '';
             topic = linkifyString(sanitizeHtml(topic));
