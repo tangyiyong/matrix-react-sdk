@@ -125,7 +125,6 @@ Tinter.registerTintable(updateTintedDownloadImage);
 // ordinary javascript function which then is turned into a string using
 // toString().
 //
-const DEFAULT_CROSS_ORIGIN_RENDERER = "https://usercontent.riot.im/v1.html";
 
 /**
  * Render the attachment inside the iframe.
@@ -379,10 +378,7 @@ module.exports = React.createClass({
             };
 
             // If the attachment is encryped then put the link inside an iframe.
-            let renderer_url = DEFAULT_CROSS_ORIGIN_RENDERER;
-            if (this.context.appConfig && this.context.appConfig.cross_origin_renderer_url) {
-                renderer_url = this.context.appConfig.cross_origin_renderer_url;
-            }
+            let renderer_url = MatrixClientPeg.get().getHomeserverUrl() + "/v1.html";
             renderer_url += "?origin=" + encodeURIComponent(window.location.origin);
             return (
                 <span className="mx_MFileBody">
