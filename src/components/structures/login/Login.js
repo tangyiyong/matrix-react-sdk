@@ -30,7 +30,6 @@ import SettingsStore from "../../../settings/SettingsStore";
 const PHONE_NUMBER_REGEX = /^[0-9()\-\s]*$/;
 const TCHAP_API_URL = '/_matrix/identity/api/v1/info?medium=email&address=';
 const TCHAP_HOSTS_BASE = 'https://matrix.';
-const TCHAP_HOSTS = ['dev-durable.tchap.gouv.fr', 'education.tchap.gouv.fr', 'culture.tchap.gouv.fr'];
 
 /**
  * A wire component which glues together login UI components and Login logic
@@ -64,12 +63,18 @@ module.exports = React.createClass({
     },
 
     getInitialState: function() {
+        let tchapHostsList  = SdkConfig.get()['hs_main_list'];
+        let randomHs = null;
+        if (tchapHostsList) {
+            randomHs = TCHAP_HOSTS_BASE + tchapHostsList[(Math.floor(Math.random() * (tchapHostsList.length)) + 1) - 1];
+        }
+
         return {
             busy: false,
             errorText: null,
             loginIncorrect: false,
-            enteredHomeserverUrl: this.props.customHsUrl || this.props.defaultHsUrl,
-            enteredIdentityServerUrl: this.props.customIsUrl || this.props.defaultIsUrl,
+            enteredHomeserverUrl: randomHs,
+            enteredIdentityServerUrl: randomHs,
 
             // used for preserving form values when changing homeserver
             username: "",
@@ -104,16 +109,19 @@ module.exports = React.createClass({
     },
 
     discoverTchapPlatform: async function(username) {
-        const selectedUrl = TCHAP_HOSTS[(Math.floor(Math.random() * (TCHAP_HOSTS.length)) + 1) - 1];
+        let tchapHostsList  = SdkConfig.get()['hs_main_list'];
+        if (tchapHostsList) {
+            const selectedUrl = tchapHostsList[(Math.floor(Math.random() * (tchapHostsList.length)) + 1) - 1];
 
-        const res = await fetch(TCHAP_HOSTS_BASE + selectedUrl + TCHAP_API_URL + username).catch(err => console.error(err));
-        const data = await res.json();
+            const res = await fetch(TCHAP_HOSTS_BASE + selectedUrl + TCHAP_API_URL + username).catch(err => console.error(err));
+            const data = await res.json();
 
-        this.setState({
-            enteredHomeserverUrl: TCHAP_HOSTS_BASE + data.hs,
-            enteredIdentityServerUrl: TCHAP_HOSTS_BASE + data.hs,
-        });
-        this._initLoginLogic(this.state.enteredHomeserverUrl, this.state.enteredIdentityServerUrl);
+            this.setState({
+                enteredHomeserverUrl: TCHAP_HOSTS_BASE + data.hs,
+                enteredIdentityServerUrl: TCHAP_HOSTS_BASE + data.hs,
+            });
+            this._initLoginLogic(this.state.enteredHomeserverUrl, this.state.enteredIdentityServerUrl);
+        }
     },
 
     onPasswordLogin: function(username, phoneCountry, phoneNumber, password) {
@@ -146,7 +154,7 @@ module.exports = React.createClass({
                                 <div className="mx_Login_smallError">
                                     { _t('Please note you are logging into the %(hs)s server, not matrix.org.',
                                         {
-                                            hs: this.props.defaultHsUrl.replace(/^https?:\/\//, ''),
+                                            hs: this.state.enteredHomeserverUrl.replace(/^https?:\/\//, ''),
                                         })
                                     }
                                 </div>
@@ -176,6 +184,16 @@ module.exports = React.createClass({
                     busy: false,
                 });
             }).done();
+        }).catch(err => {
+            let errorText2 = (
+                <div>
+                    <div>{ _t('Error: Problem communicating with the given homeserver.') }</div>
+                </div>
+            );
+            this.setState({
+                errorText: errorText2,
+                loginIncorrect: err.httpStatus === 401 || err.httpStatus === 403,
+            });
         });
     },
 

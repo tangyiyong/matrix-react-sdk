@@ -29,6 +29,7 @@ var linkifyString = require('linkifyjs/string');
 var linkifyMatrix = require('../../linkify-matrix');
 var sanitizeHtml = require('sanitize-html');
 import Promise from 'bluebird';
+import SdkConfig from '../../SdkConfig';
 
 import { _t } from '../../languageHandler';
 
@@ -59,20 +60,6 @@ module.exports = React.createClass({
             includeAll: false,
             roomServer: null,
             filterString: null,
-            serverList: [
-                'dev-durable.tchap.gouv.fr',
-                'education.tchap.gouv.fr',
-                'culture.tchap.gouv.fr',
-                'dinum.tchap.gouv.fr',
-                'intradef.tchap.gouv.fr',
-                'diplomatie.tchap.gouv.fr',
-                'justice.tchap.gouv.fr',
-                'agriculture.tchap.gouv.fr',
-                'interieur.tchap.gouv.fr',
-                'social.tchap.gouv.fr',
-                'finances.tchap.gouv.fr',
-                'ssi.tchap.gouv.fr',
-                'pm.tchap.gouv.fr']
         }
     },
 
@@ -103,18 +90,21 @@ module.exports = React.createClass({
             });
         });
 
-        let serverList = this.state.serverList;
+        let hsMainList = SdkConfig.get()['hs_main_list'];
+        if (hsMainList) {
+            let serverList = hsMainList.concat(SdkConfig.get()['hs_additional_list']).filter(Boolean);
 
-        for (let i = 0; i <= serverList.length; i++) {
-            let opts = {};
-            opts.server = serverList[i];
-            MatrixClientPeg.get().publicRooms(opts).then((data) => {
-                this.setState((st) => {
-                    st.allPublicRooms.push(...data.chunk);
-                    st.loading = false;
-                    return st;
+            for (let i = 0; i <= serverList.length; i++) {
+                let opts = {};
+                opts.server = serverList[i];
+                MatrixClientPeg.get().publicRooms(opts).then((data) => {
+                    this.setState((st) => {
+                        st.allPublicRooms.push(...data.chunk);
+                        st.loading = false;
+                        return st;
+                    });
                 });
-            });
+            }
         }
 
         // dis.dispatch({
@@ -432,7 +422,8 @@ module.exports = React.createClass({
         for (var i = 0; i < rooms.length; i++) {
             var name = rooms[i].name || get_display_alias_for_room(rooms[i]) || _t('Unnamed room');
             let displayAlias = get_display_alias_for_room(rooms[i]);
-            let alias = displayAlias.split(":")[1].split(".")[0];
+            let preAlias = (displayAlias && displayAlias !== '' ? displayAlias : rooms[i].room_id);
+            let alias = preAlias.split(":")[1].split(".")[0];
 
             var topic = rooms[i].topic || '';
             topic = linkifyString(sanitizeHtml(topic));

@@ -33,7 +33,6 @@ import SettingsStore from "../../../settings/SettingsStore";
 const MIN_PASSWORD_LENGTH = 6;
 const TCHAP_API_URL = '/_matrix/identity/api/v1/info?medium=email&address=';
 const TCHAP_HOSTS_BASE = 'https://matrix.';
-const TCHAP_HOSTS = ['dev-durable.tchap.gouv.fr', 'education.tchap.gouv.fr', 'culture.tchap.gouv.fr'];
 
 module.exports = React.createClass({
     displayName: 'Registration',
@@ -93,8 +92,8 @@ module.exports = React.createClass({
             // If we've been given a session ID, we're resuming
             // straight back into UI auth
             doingUIAuth: Boolean(this.props.sessionId),
-            hsUrl: this.props.customHsUrl,
-            isUrl: this.props.customIsUrl,
+            hsUrl: null,
+            isUrl: null,
         };
     },
 
@@ -311,14 +310,17 @@ module.exports = React.createClass({
     },
 
     discoverTchapPlatform: async function(username) {
-        const selectedUrl = TCHAP_HOSTS[(Math.floor(Math.random() * (TCHAP_HOSTS.length)) + 1) - 1];
-        const res = await fetch(TCHAP_HOSTS_BASE + selectedUrl + TCHAP_API_URL + username).catch(err => console.error(err));
-        const data = await res.json();
-        this.setState({
-            hsUrl: TCHAP_HOSTS_BASE + data.hs,
-            isUrl: TCHAP_HOSTS_BASE + data.hs,
-        });
-        this._replaceClient();
+        let tchapHostsList = SdkConfig.get()['hs_main_list'];
+        if (tchapHostsList) {
+            const selectedUrl = tchapHostsList[(Math.floor(Math.random() * (tchapHostsList.length)) + 1) - 1];
+            const res = await fetch(TCHAP_HOSTS_BASE + selectedUrl + TCHAP_API_URL + username).catch(err => console.error(err));
+            const data = await res.json();
+            this.setState({
+                hsUrl: TCHAP_HOSTS_BASE + data.hs,
+                isUrl: TCHAP_HOSTS_BASE + data.hs,
+            });
+            this._replaceClient();
+        }
     },
 
     _makeRegisterRequest: function(auth) {
@@ -376,20 +378,6 @@ module.exports = React.createClass({
         } else if (this.state.busy || this.state.teamServerBusy) {
             registerBody = <Spinner />;
         } else {
-            let serverConfigSection;
-            if (!SdkConfig.get()['disable_custom_urls']) {
-                serverConfigSection = (
-                    <ServerConfig ref="serverConfig"
-                        withToggleButton={true}
-                        customHsUrl={this.props.customHsUrl}
-                        customIsUrl={this.props.customIsUrl}
-                        defaultHsUrl={this.props.defaultHsUrl}
-                        defaultIsUrl={this.props.defaultIsUrl}
-                        onServerConfigChange={this.onServerConfigChange}
-                        delayTimeMs={1000}
-                    />
-                );
-            }
             registerBody = (
                 <div>
                     <RegistrationForm
@@ -403,7 +391,6 @@ module.exports = React.createClass({
                         onRegisterClick={this.onFormSubmit}
                         onTeamSelected={this.onTeamSelected}
                     />
-                    { serverConfigSection }
                 </div>
             );
         }
