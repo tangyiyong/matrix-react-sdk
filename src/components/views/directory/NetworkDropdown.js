@@ -198,11 +198,6 @@ export default class NetworkDropdown extends React.Component {
         let span_class;
         let key;
 
-        console.error("----------------------------");
-        console.error(instance);
-        console.error(instance ? instance.desc : server);
-        console.error("----------------------------");
-
         if (!instance) {
             key = server;
             name = server;
