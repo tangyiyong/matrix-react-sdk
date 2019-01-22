@@ -198,6 +198,11 @@ export default class NetworkDropdown extends React.Component {
         let span_class;
         let key;
 
+        console.error("----------------------------");
+        console.error(instance);
+        console.error(instance ? instance.desc : server);
+        console.error("----------------------------");
+
         if (!instance) {
             key = server;
             name = server;
@@ -213,11 +218,13 @@ export default class NetworkDropdown extends React.Component {
             span_class = 'mx_NetworkDropdown_menu_network';
         }
 
+        let shortName = name.split('.tchap.gouv.fr')[0].split('.').filter(Boolean).reverse()[0];
+
         const click_handler = handleClicks ? this.onMenuOptionClick.bind(this, server, instance, includeAll) : null;
 
         return <div key={key} className="mx_NetworkDropdown_networkoption" onClick={click_handler}>
             {icon}
-            <span className="mx_NetworkDropdown_menu_network">{name}</span>
+            <span className="mx_NetworkDropdown_menu_network">{shortName}</span>
         </div>
     }
 
