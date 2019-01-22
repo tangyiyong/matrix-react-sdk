@@ -109,6 +109,7 @@ module.exports = React.createClass({
         const banned = myMember && myMember.membership == 'ban';
 
         if (this.props.inviterName) {
+            let fullName = this.props.inviterName.split(':')[0].split('@').reverse()[0].split('-')[0];
             let emailMatchBlock;
             if (this.props.invitedEmail) {
                 if (this.state.threePidFetchError) {
@@ -133,7 +134,7 @@ module.exports = React.createClass({
             joinBlock = (
                 <div>
                     <div className="mx_RoomPreviewBar_invite_text">
-                        { _t('You have been invited to join this room by %(inviterName)s', {inviterName: this.props.inviterName}) }
+                        { _t('You have been invited to join this room by %(inviterName)s', {inviterName: fullName}) }
                     </div>
                     <div className="mx_RoomPreviewBar_join_text">
                         { _t(
