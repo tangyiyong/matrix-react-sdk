@@ -29,6 +29,7 @@ var linkifyString = require('linkifyjs/string');
 var linkifyMatrix = require('../../linkify-matrix');
 var sanitizeHtml = require('sanitize-html');
 import Promise from 'bluebird';
+import SdkConfig from '../../SdkConfig';
 
 import { _t } from '../../languageHandler';
 
