@@ -140,8 +140,11 @@ export default class NetworkDropdown extends React.Component {
             servers.unshift(MatrixClientPeg.getHomeServerName());
         }
 
+        let svrList = [];
         let hsMainList = SdkConfig.get()['hs_main_list'];
-        let svrList = hsMainList.concat(SdkConfig.get()['hs_additional_list']);
+        if (hsMainList) {
+            svrList = hsMainList.concat(SdkConfig.get()['hs_additional_list']);
+        }
         svrList.push('all.tchap.gouv.fr');
 
         svrList.forEach(s => {
