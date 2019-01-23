@@ -31,7 +31,7 @@ export default React.createClass({
     getInitialState: function() {
         const cli = MatrixClientPeg.get();
         const baseDomain = cli.getDomain();
-        let domain = baseDomain.split('.')[0];
+        let domain = baseDomain.split('.tchap.gouv.fr')[0].split('.').reverse().filter(Boolean)[0];
         return {
             visibility: 'private',
             isPublic: false,
