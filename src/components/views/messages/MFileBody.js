@@ -23,6 +23,7 @@ import filesize from 'filesize';
 import sdk from '../../../index';
 import { _t } from '../../../languageHandler';
 import Tinter from '../../../Tinter';
+import MatrixClientPeg from '../../../MatrixClientPeg';
 import request from 'browser-request';
 import Modal from '../../../Modal';
 import {scanContent, downloadContent, downloadContentEncrypted} from "../../../utils/ContentScanner";
