@@ -70,16 +70,26 @@ module.exports = React.createClass({
         // If this is an invite and we've been told what email
         // address was invited, fetch the user's list of 3pids
         // so we can check them against the one that was invited
-        if (this.props.inviterName && this.props.invitedEmail) {
+        if (this.props.inviterName) {
+            if (this.props.invitedEmail) {
+                this.setState({busy: true});
+                MatrixClientPeg.get().lookupThreePid(
+                    'email', this.props.invitedEmail,
+                ).finally(() => {
+                    this.setState({busy: false});
+                }).done((result) => {
+                    this.setState({invitedEmailMxid: result.mxid});
+                }, (err) => {
+                    this.setState({threePidFetchError: err});
+                });
+            }
             this.setState({busy: true});
-            MatrixClientPeg.get().lookupThreePid(
-                'email', this.props.invitedEmail,
+            MatrixClientPeg.get().getProfileInfo(
+                this.props.inviterName
             ).finally(() => {
                 this.setState({busy: false});
-            }).done((result) => {
-                this.setState({invitedEmailMxid: result.mxid});
-            }, (err) => {
-                this.setState({threePidFetchError: err});
+            }).done((data) => {
+                this.setState({realName: data.displayname});
             });
         }
     },
@@ -109,7 +119,7 @@ module.exports = React.createClass({
         const banned = myMember && myMember.membership == 'ban';
 
         if (this.props.inviterName) {
-            let fullName = this.props.inviterName.split(':')[0].split('@').reverse()[0].split('-')[0];
+            let fullName = this.state.realName;
             let emailMatchBlock;
             if (this.props.invitedEmail) {
                 if (this.state.threePidFetchError) {
