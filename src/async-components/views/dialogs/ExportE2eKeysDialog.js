@@ -121,7 +121,7 @@ export default React.createClass({
                             { _t(
                                 'This process allows you to export the keys for messages ' +
                                 'you have received in encrypted rooms to a local file. You ' +
-                                'will then be able to import the file into another Matrix ' +
+                                'will then be able to import the file into another Tchap ' +
                                 'client in the future, so that client will also be able to ' +
                                 'decrypt these messages.',
                             ) }
