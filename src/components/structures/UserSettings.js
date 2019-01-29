@@ -1282,10 +1282,7 @@ module.exports = React.createClass({
 
                 <div className="mx_UserSettings_section">
                     <div className="mx_UserSettings_advanced">
-                        { _t("Logged in as:") + ' ' }
-                        <a onClick={this.onSelfShareClick} className="mx_UserSettings_link">
-                            { this._me }
-                        </a>
+                        { _t("Logged in as:") + ' ' + this._me }
                     </div>
                     <div className="mx_UserSettings_advanced">
                         { _t('Access Token:') + ' ' }
