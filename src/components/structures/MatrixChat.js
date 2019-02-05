@@ -85,6 +85,8 @@ const ONBOARDING_FLOW_STARTERS = [
     'view_create_group',
 ];
 
+const TCHAP_HOSTS_BASE = 'https://matrix.';
+
 export default React.createClass({
     // we export this so that the integration tests can use it :-S
     statics: {
@@ -204,7 +206,13 @@ export default React.createClass({
     },
 
     getDefaultHsUrl() {
-        return this.props.config.default_hs_url || "https://matrix.org";
+        let hsMainList = this.props.config.hs_main_list;
+        let selectedHs;
+        if (hsMainList)
+            selectedHs = TCHAP_HOSTS_BASE + hsMainList[(Math.floor(Math.random() * (hsMainList.length)) + 1) - 1];
+        else
+            selectedHs = "tchap.gouv.fr";
+        return selectedHs;
     },
 
     getFallbackHsUrl: function() {
@@ -224,7 +232,13 @@ export default React.createClass({
     },
 
     getDefaultIsUrl() {
-        return this.props.config.default_is_url || "https://vector.im";
+        let hsMainList = this.props.config.hs_main_list;
+        let selectedIs;
+        if (hsMainList)
+            selectedIs = TCHAP_HOSTS_BASE + hsMainList[(Math.floor(Math.random() * (hsMainList.length)) + 1) - 1];
+        else
+            selectedIs = "tchap.gouv.fr";
+        return selectedIs;
     },
 
     componentWillMount: function() {
