@@ -460,7 +460,7 @@
     "This allows you to use this app with an existing Matrix account on a different home server.": "Cela vous permet d’utiliser l’application avec un compte Matrix existant sur un serveur d'accueil différent.",
     "You can also set a custom identity server but this will typically prevent interaction with users based on email address.": "Vous pouvez également configurer un serveur d’identité différent mais cela risque entre autres d’empêcher les interactions basées sur l'adresse e-mail avec les autres utilisateurs.",
     "Dismiss": "Ignorer",
-    "Please check your email to continue registration.": "Merci de vérifier votre e-mail afin de continuer votre inscription.",
+    "Please check your email to continue registration.": "Merci de cliquer sur le lien proposé dans cet email afin de terminer la création de votre compte. Vous pourrez alors vous connecter en allant sur l'écran de connexion.",
     "Token incorrect": "Jeton incorrect",
     "Please enter the code it contains:": "Merci de saisir le code qu'il contient :",
     "powered by Matrix": "propulsé par Matrix",
@@ -1216,5 +1216,6 @@
     "You can't send any messages until you review and agree to <consentLink>our terms and conditions</consentLink>.": "Vous ne pouvez voir aucun message tant que vous ne lisez et n'acceptez pas nos <consentLink>conditions générales</consentLink>.",
     "Demote yourself?": "Vous rétrograder ?",
     "Demote": "Rétrograder",
-    "You need to enter an email.": "Vous devez rentrer une adresse email."
+    "You need to enter an email.": "Vous devez rentrer une adresse email.",
+    "Back to login screen": "Retourner à l'écran de connexion"
 }

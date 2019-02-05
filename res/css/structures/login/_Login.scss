@@ -37,6 +37,7 @@ limitations under the License.
     padding-top: 50px;
     padding-bottom: 50px;
     margin: auto;
+    text-align: center;
 }
 
 .mx_Login_logo {
@@ -280,4 +281,19 @@ limitations under the License.
   display: flex;
   margin-top: 12px;
   margin-bottom: 12px;
+}
+
+.tc_RegisterBox {
+    width: 700px;
+    margin-left: -200px;
+    text-align: center;
+}
+
+.tc_RegisterBox_ButtonBox {
+    margin: 40px auto;
+}
+
+.tc_RegisterBox_Button {
+    color: white !important;
+    text-decoration: none;
 }

@@ -272,12 +272,15 @@ export const EmailIdentityAuthEntry = React.createClass({
             return <Loader />;
         } else {
             return (
-                <div>
+                <div className="tc_RegisterBox">
                     <p>{ _t("An email has been sent to %(emailAddress)s",
                         { emailAddress: (sub) => <i>{ this.props.inputs.emailAddress }</i> },
                     ) }
                     </p>
                     <p>{ _t("Please check your email to continue registration.") }</p>
+                    <div className="tc_RegisterBox_ButtonBox">
+                        <a className="mx_UserSettings_button mx_AccessibleButton tc_RegisterBox_Button" href="/">{ _t("Back to login screen") }</a>
+                    </div>
                 </div>
             );
         }
