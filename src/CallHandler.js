@@ -117,6 +117,9 @@ function _setCallListeners(call) {
     call.on("error", function(err) {
         console.error("Call error: %s", err);
         console.error(err.stack);
+        // The dialog box asking about what to do if there is an unknown device
+        // in the room have been disabled for the moment.
+        // We consider "Call Anyway" as the default choice.
         if (err.code === 'unknown_devices') {
             _reAttemptCall(call);
         } else {

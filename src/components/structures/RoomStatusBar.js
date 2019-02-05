@@ -297,6 +297,9 @@ module.exports = React.createClass({
         });
 
         if (hasUDE) {
+            // The dialog box asking about what to do if there is an unknown device
+            // in the room have been disabled for the moment.
+            // We consider "Send Anyway" as the default choice.
             this._onSendWithoutVerifyingClick();
         } else {
             let consentError = null;
