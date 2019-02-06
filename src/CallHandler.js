@@ -118,31 +118,10 @@ function _setCallListeners(call) {
         console.error("Call error: %s", err);
         console.error(err.stack);
         if (err.code === 'unknown_devices') {
-            const QuestionDialog = sdk.getComponent("dialogs.QuestionDialog");
-
-            Modal.createTrackedDialog('Call Failed', '', QuestionDialog, {
-                title: _t('Call Failed'),
-                description: _t(
-                    "There are unknown devices in this room: "+
-                    "if you proceed without verifying them, it will be "+
-                    "possible for someone to eavesdrop on your call.",
-                ),
-                button: _t('Review Devices'),
-                onFinished: function(confirmed) {
-                    if (confirmed) {
-                        const room = MatrixClientPeg.get().getRoom(call.roomId);
-                        showUnknownDeviceDialogForCalls(
-                            MatrixClientPeg.get(),
-                            room,
-                            () => {
-                                _reAttemptCall(call);
-                            },
-                            call.direction === 'outbound' ? _t("Call Anyway") : _t("Answer Anyway"),
-                            call.direction === 'outbound' ? _t("Call") : _t("Answer"),
-                        );
-                    }
-                },
-            });
+            // The dialog box asking about what to do if there is an unknown device
+            // in the room have been disabled for the moment.
+            // We consider "Call Anyway" as the default choice.
+            _reAttemptCall(call);
         } else {
             const ErrorDialog = sdk.getComponent("dialogs.ErrorDialog");
 

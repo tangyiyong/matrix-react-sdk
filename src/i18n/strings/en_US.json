@@ -843,5 +843,6 @@
     "Data from an older version of Tchap has been detected. This will have caused end-to-end cryptography to malfunction in the older version. End-to-end encrypted messages exchanged recently whilst using the older version may not be decryptable in this version. This may also cause messages exchanged with this version to fail. If you experience problems, log out and back in again. To retain message history, export and re-import your keys.": "Data from an older version of Tchap has been detected. This will have caused end-to-end cryptography to malfunction in the older version. End-to-end encrypted messages exchanged recently whilst using the older version may not be decryptable in this version. This may also cause messages exchanged with this version to fail. If you experience problems, log out and back in again. To retain message history, export and re-import your keys.",
     "Did you know: you can use communities to filter your Tchap experience!": "Did you know: you can use communities to filter your Tchap experience!",
     "The version of Tchap": "The version of Tchap",
-    "Tchap bugs are tracked on GitHub: <a>create a GitHub issue</a>.": "Tchap bugs are tracked on GitHub: <a>create a GitHub issue</a>."
+    "Tchap bugs are tracked on GitHub: <a>create a GitHub issue</a>.": "Tchap bugs are tracked on GitHub: <a>create a GitHub issue</a>.",
+    "Unable to decrypt: The sender's device has not sent us the keys for this message.": "Unable to decrypt: The sender's device has not sent us the keys for this message."
 }
