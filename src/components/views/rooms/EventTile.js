@@ -764,7 +764,7 @@ function E2ePadlockVerified(props) {
 function E2ePadlockUnverified(props) {
     return (
         <E2ePadlock alt={_t("Encrypted by an unverified device")}
-            src="img/e2e-warning.svg" width="15" height="12"
+            src="img/e2e-verified.svg" width="15" height="12"
             style={{ marginLeft: "-2px" }} {...props} />
     );
 }
