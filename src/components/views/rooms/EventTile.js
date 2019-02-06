@@ -762,9 +762,11 @@ function E2ePadlockVerified(props) {
 }
 
 function E2ePadlockUnverified(props) {
+    // "Verified" icon is used until another solution is found in order to make
+    // users understand that their messages are encrypted regardless of the icon used.
     return (
         <E2ePadlock alt={_t("Encrypted by an unverified device")}
-            src="img/e2e-warning.svg" width="15" height="12"
+            src="img/e2e-verified.svg" width="15" height="12"
             style={{ marginLeft: "-2px" }} {...props} />
     );
 }
