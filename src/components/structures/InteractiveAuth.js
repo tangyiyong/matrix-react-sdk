@@ -111,21 +111,10 @@ export default React.createClass({
                 errorText: msg,
             });
         }).done();
-
-        this._intervalId = null;
-        if (this.props.poll) {
-            this._intervalId = setInterval(() => {
-                this._authLogic.poll();
-            }, 2000);
-        }
     },
 
     componentWillUnmount: function() {
         this._unmounted = true;
-
-        if (this._intervalId !== null) {
-            clearInterval(this._intervalId);
-        }
     },
 
     _authStateUpdated: function(stageType, stageState) {
