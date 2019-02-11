@@ -87,7 +87,7 @@ function createRoom(opts) {
         },
         {
             content: {
-                history_visibility: 'world_readable',
+                history_visibility: createOpts.visibility === "private" ? 'invited' : 'world_readable',
             },
             type: 'm.room.history_visibility',
             state_key: '',
