@@ -170,8 +170,8 @@ module.exports = React.createClass({
         const SettingsButton = sdk.getComponent('elements.SettingsButton');
         const GroupsButton = sdk.getComponent('elements.GroupsButton');
 
-        const groupsButton = SettingsStore.getValue("TagPanel.disableTagPanel") ?
-            <GroupsButton tooltip={true} /> : null;
+        // Communities have been disabled for the moment.
+        // const groupsButton = SettingsStore.getValue("TagPanel.disableTagPanel") ? <GroupsButton tooltip={true} /> : null;
 
         return (
             <div className="mx_BottomLeftMenu">
@@ -186,7 +186,6 @@ module.exports = React.createClass({
                     <div ref={this._collectCreateRoomButton}>
                         <CreateRoomButton tooltip={true} />
                     </div>
-                    { groupsButton }
                     <span className="mx_BottomLeftMenu_settings">
                         <SettingsButton tooltip={true} />
                     </span>
