@@ -74,6 +74,18 @@ function createRoom(opts) {
         opts.andView = true;
     }
 
+    //
+    let powerLevelsContent = {
+        invite: 50,
+        events: {
+            'm.room.history_visibility': 100,
+            'm.room.power_levels': 100
+        },
+        users: {}
+    };
+
+    powerLevelsContent.users[client.getUserId()] = 100;
+
     // Allow guests by default since the room is private and they'd
     // need an invite. This means clicking on a 3pid invite email can
     // actually drop you right in to a chat.
@@ -92,6 +104,11 @@ function createRoom(opts) {
             type: 'm.room.history_visibility',
             state_key: '',
         },
+        {
+            content: powerLevelsContent,
+            type: 'm.room.power_levels',
+            state_key: ''
+        }
     ];
 
     const modal = Modal.createDialog(Loader, null, 'mx_Dialog_spinner');
