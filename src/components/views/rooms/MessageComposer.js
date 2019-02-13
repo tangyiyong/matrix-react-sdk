@@ -319,9 +319,10 @@ export default class MessageComposer extends React.Component {
                 formattingButton,
                 stickerpickerButton,
                 uploadButton,
-                hangupButton,
-                callButton,
-                videoCallButton,
+                // VOIP and Video have been disabled for the moment.
+                //hangupButton,
+                //callButton,
+                //videoCallButton,
             );
         } else {
             controls.push(
