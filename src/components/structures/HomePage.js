@@ -27,6 +27,7 @@ import RoomDirectoryButton from "../views/elements/RoomDirectoryButton";
 import StartChatButton from "../views/elements/StartChatButton";
 import CreateRoomButton from "../views/elements/CreateRoomButton";
 import SettingsButton from "../views/elements/SettingsButton";
+import SdkConfig from '../../SdkConfig';
 import p from '../../../package';
 
 class HomePage extends React.Component {
@@ -102,6 +103,7 @@ class HomePage extends React.Component {
         else {
             const GeminiScrollbarWrapper = sdk.getComponent("elements.GeminiScrollbarWrapper");
             const TintableSvg = sdk.getComponent("elements.TintableSvg");
+            const faqUrl = `${SdkConfig.get()['host_url']}/faq.html`;
             const version = p.version;
 
             return (
@@ -142,7 +144,7 @@ class HomePage extends React.Component {
                             <span className="tc_HomePage_Element_Descr">Personnaliser le compte,<br />changer le mot de passe,<br />gérer les notifications, se déconnecter,...</span>
                         </div>
                         <div className="tc_HomePage_Element">
-                            <a href="https://www.tchap.gouv.fr" className="tc_HomePage_Element_Button tc_HomePage_Element_Faq" target="_blank"></a>
+                            <a href={faqUrl} className="tc_HomePage_Element_Button tc_HomePage_Element_Faq" target="_blank"></a>
                             <hr />
                         </div>
                     </div>
