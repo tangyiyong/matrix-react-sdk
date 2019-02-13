@@ -560,6 +560,11 @@ module.exports = React.createClass({
             }
         }
 
+        // The NetworkDropdown previously used here was removed.
+        // The new default behavior is to list all the public rooms from the federation.
+        // There is no more ways to to filter rooms by federation.
+        // See dinsic-pim/matrix-react-sdk#144 for more informations.
+
         const DirectorySearchBox = sdk.getComponent('elements.DirectorySearchBox');
         return (
             <div className="mx_RoomDirectory">
