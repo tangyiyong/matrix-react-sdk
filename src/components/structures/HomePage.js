@@ -108,11 +108,11 @@ class HomePage extends React.Component {
 
             return (
                 <GeminiScrollbarWrapper autoshow={true} className="tc_HomePage">
-                    <div className="tc_HomePage_GroupElement">
+                    <div className="tc_HomePage_Element_Logo">
                         <TintableSvg src="img/logos/tchap-logo.svg" width="120" height="120" />
                         <p className="tc_HomePage_GroupElement_Descr">Tchap</p>
                     </div>
-                    <div className="tc_HomePage_ThreeGroupElement">
+                    <div className="tc_HomePage_GroupElement tc_HomePage_ThreeGroupElement">
                         <div className="tc_HomePage_Element">
                             <div className="tc_HomePage_Element_Button tc_HomePage_Element_StartChat">
                                 <StartChatButton size="160" callout={true}/>
@@ -135,7 +135,7 @@ class HomePage extends React.Component {
                             <span className="tc_HomePage_Element_Descr">Consulter la liste<br />et rejoindre un salon public</span>
                         </div>
                     </div>
-                    <div className="tc_HomePage_TwoGroupElement">
+                    <div className="tc_HomePage_GroupElement tc_HomePage_TwoGroupElement">
                         <div className="tc_HomePage_Element">
                             <div className="tc_HomePage_Element_Button tc_HomePage_Element_Settings">
                                 <SettingsButton size="120" callout={true}/>
